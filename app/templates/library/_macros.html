@@ -1,0 +1,189 @@
+{% macro thumb_img(url) %}
+  {% if url %}
+    <img class="tile-thumb" src="{{ url }}" alt="" loading="lazy" referrerpolicy="no-referrer"
+         onerror="this.replaceWith(Object.assign(document.createElement('span'), {className: 'tile-thumb tile-thumb-placeholder', textContent: '🎵'}))">
+  {% else %}
+    <span class="tile-thumb tile-thumb-placeholder">🎵</span>
+  {% endif %}
+{% endmacro %}
+
+{# Titre suivi d'une pastille YouTube : morceau venant de YouTube Music, ou
+   artiste/album dont tous les morceaux en viennent (rien pour les MP3
+   locaux, le cas par defaut) #}
+{% macro title_line(title, youtube) %}
+<span class="track-title-line">
+  <span class="track-title">{{ title }}</span>
+  {% if youtube %}<span class="track-source" title="{{ t('library_source_youtube') }}">{{ icon('youtube') }}</span>{% endif %}
+</span>
+{% endmacro %}
+
+{% macro track_title(track) %}{{ title_line(track.Title, track.Source == 'youtube') }}{% endmacro %}
+
+{# track = MusicTrack (catalogue) ; is_new = badge 'New' propre a l'utilisateur #}
+{% macro track_li(track, is_new=False) %}
+<li class="track-item">
+  {{ thumb_img(cover_for(track)) }}
+  <button type="button" class="track-play-btn" onclick="tunoovaStartPlayback('{{ url_for('library.play', track_id=track.TrackId) }}')">
+    {{ track_title(track) }}
+    <span class="track-subtitle">{{ track.artist.Name }}{% if track.album %} — {{ track.album.Title }}{% endif %}</span>
+  </button>
+  {% if is_new %}<span class="badge badge-new">New</span>{% endif %}
+</li>
+{% endmacro %}
+
+{# a = {"artist": MusicArtist, "thumb": url, "youtube_only": bool} ; fav = tri "Ma musique preferee" #}
+{% macro artist_li(a, fav=False) %}
+<li class="track-item">
+  <a class="track-row-btn" href="{{ url_for('library.artist_detail', artist_id=a.artist.ArtistId, fav=1 if fav else None) }}">
+    {{ thumb_img(a.thumb) }}
+    {{ title_line(a.artist.Name, a.youtube_only) }}
+  </a>
+  <a class="track-row-chevron" href="{{ url_for('library.artist_detail', artist_id=a.artist.ArtistId, fav=1 if fav else None) }}" aria-label="{{ a.artist.Name }}">{{ icon('chevron-right') }}</a>
+</li>
+{% endmacro %}
+
+{# a = {"album": MusicAlbum, "thumb": url, "youtube_only": bool} ;
+   show_artist = nom de l'artiste sous le titre (inutile sur la page de l'artiste) ;
+   back = cible du retour de l'ecran de l'album, si autre que celle par defaut.
+   Clic sur la ligne : album complet, lu en entier ; chevron : morceaux
+   ecoutes seulement si `fav` (tri "Ma musique preferee") #}
+{% macro album_li(a, fav=False, show_artist=True, back=None) %}
+<li class="track-item">
+  <a class="track-row-btn" href="{{ url_for('library.album_detail', album_id=a.album.AlbumId, autoplay=1, back=back) }}">
+    {{ thumb_img(a.thumb) }}
+    {% if show_artist and a.album.artist %}
+      <span class="track-info">
+        {{ title_line(a.album.Title, a.youtube_only) }}
+        <span class="track-subtitle">{{ a.album.artist.Name }}</span>
+      </span>
+    {% else %}
+      {{ title_line(a.album.Title, a.youtube_only) }}
+    {% endif %}
+  </a>
+  <a class="track-row-chevron" href="{{ url_for('library.album_detail', album_id=a.album.AlbumId, fav=1 if fav else None, back=back) }}" aria-label="{{ a.album.Title }}">{{ icon('chevron-right') }}</a>
+</li>
+{% endmacro %}
+
+{# queue = TrackIds de la liste separes par des virgules : Precedent/Suivant suivent cet ordre #}
+{% macro top_track_li(track, is_new=False, queue=None) %}
+<li class="track-item">
+  {{ thumb_img(cover_for(track)) }}
+  <button type="button" class="track-play-btn" onclick="tunoovaStartPlayback('{{ url_for('library.play', track_id=track.TrackId, queue=queue) }}')">
+    {{ track_title(track) }}
+  </button>
+  {% if is_new %}<span class="badge badge-new">New</span>{% endif %}
+</li>
+{% endmacro %}
+
+{% macro top_tracks_row(artist_name) %}
+<li class="track-item">
+  <a class="track-row-btn" href="{{ url_for('library.artist_top', name=artist_name, autoplay=1) }}">
+    <img class="tile-thumb tile-thumb-logo" src="{{ url_for('static', filename='brand/most-popular.png') }}" alt="">
+    <span class="track-title">{{ t('library_top_tracks') }}</span>
+  </a>
+  <a class="track-row-chevron" href="{{ url_for('library.artist_top', name=artist_name) }}" aria-label="{{ t('library_top_tracks') }}">{{ icon('chevron-right') }}</a>
+</li>
+{% endmacro %}
+
+{# Albums de l'artiste absents de son ecran : bibliotheque + YouTube Music #}
+{% macro other_albums_row(artist, fav=False) %}
+<li class="track-item">
+  <a class="track-row-btn" href="{{ url_for('library.artist_other_albums', artist_id=artist.ArtistId, fav=1 if fav else None) }}">
+    <img class="tile-thumb tile-thumb-logo" src="{{ url_for('static', filename='brand/other-albums.png') }}" alt="">
+    <span class="track-title">{{ t('library_other_albums') }}</span>
+  </a>
+  <a class="track-row-chevron" href="{{ url_for('library.artist_other_albums', artist_id=artist.ArtistId, fav=1 if fav else None) }}" aria-label="{{ t('library_other_albums') }}">{{ icon('chevron-right') }}</a>
+</li>
+{% endmacro %}
+
+{% macro yt_artist_row(a) %}
+<li class="track-item yt-result">
+  <a class="track-row-btn" href="{{ url_for('library.artist_top', name=a.name, autoplay=1) }}">
+    {{ thumb_img(a.thumbnail) }}
+    <span class="track-title">{{ a.name }}</span>
+  </a>
+  <a class="track-row-chevron" href="{{ url_for('library.youtube_artist', channel_id=a.channel_id, name=a.name) }}" aria-label="{{ a.name }}">{{ icon('chevron-right') }}</a>
+</li>
+{% endmacro %}
+
+{# back = URL de l'ecran courant (albums YouTube de l'artiste), cible du retour de l'ecran des titres #}
+{% macro yt_album_row(a, back=None) %}
+<li class="track-item yt-result">
+  <a class="track-row-btn" href="{{ url_for('library.youtube_album_import', browse_id=a.browse_id, back=back) }}">
+    {{ thumb_img(a.thumbnail) }}
+    <span class="track-info">
+      <span class="track-title">{{ a.title }}</span>
+      {% set sub = [a.artist, a.year]|select|join(' — ') %}
+      {% if sub %}<span class="track-subtitle">{{ sub }}</span>{% endif %}
+    </span>
+  </a>
+  <a class="track-row-chevron" href="{{ url_for('library.youtube_album', browse_id=a.browse_id, back=back) }}" aria-label="{{ a.title }}">{{ icon('chevron-right') }}</a>
+</li>
+{% endmacro %}
+
+{% macro yt_track_row(track, back=None) %}
+<li class="track-item yt-result">
+  {# Toute la ligne lance l'ecoute sur place (ajout + lecture), sans changer d'ecran #}
+  <button type="button" class="track-row-btn"
+          onclick="tunoovaStartPlayback({{ url_for('library.youtube_track_add', video_id=track.video_id, title=track.title, artist=track.artist, album=track.album or '')|tojson|forceescape }})">
+    {{ thumb_img(track.thumbnail) }}
+    <span class="track-info">
+      <span class="track-title">{{ track.title }}</span>
+      <span class="track-subtitle">{{ track.artist }}</span>
+    </span>
+  </button>
+</li>
+{% endmacro %}
+
+{% macro search_group(g) %}
+<div class="library-group">
+  <ul class="track-list">
+    {% for a in g.albums %}
+      {{ album_li(a) }}
+    {% endfor %}
+    {% for track in g.loose_tracks %}
+      {{ track_li(track, track.TrackId in g.new_ids) }}
+    {% else %}
+      {% if not g.albums %}
+        <li class="track-item empty-state">{{ t('library_no_tracks') }}</li>
+      {% endif %}
+    {% endfor %}
+  </ul>
+</div>
+{% endmacro %}
+
+{% macro artist_flat_group(g) %}
+<div class="library-group">
+  <ul class="track-list">
+    {% for a in g.artists %}
+      {{ artist_li(a, g.fav) }}
+    {% else %}
+      <li class="track-item empty-state">{{ t('library_no_tracks') }}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endmacro %}
+
+{% macro album_flat_group(g) %}
+<div class="library-group">
+  <ul class="track-list">
+    {% for a in g.albums %}
+      {{ album_li(a) }}
+    {% else %}
+      <li class="track-item empty-state">{{ t('library_no_albums') }}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endmacro %}
+
+{% macro flat_group(g) %}
+<div class="library-group">
+  <ul class="track-list">
+    {% for track in g.tracks %}
+      {{ track_li(track, track.TrackId in g.new_ids) }}
+    {% else %}
+      <li class="track-item empty-state">{{ t('library_no_tracks') }}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endmacro %}

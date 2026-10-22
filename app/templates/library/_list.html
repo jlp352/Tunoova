@@ -1,0 +1,41 @@
+{% import "library/_macros.html" as m %}
+<div id="library-list">
+  {% for g in groups %}
+    {% if g.mode == "artist_flat" %}
+      {{ m.artist_flat_group(g) }}
+    {% elif g.mode == "album_flat" %}
+      {{ m.album_flat_group(g) }}
+    {% elif g.mode == "search" %}
+      {{ m.search_group(g) }}
+    {% elif g.mode == "flat" %}
+      {{ m.flat_group(g) }}
+    {% endif %}
+  {% else %}
+    <p class="empty-state">{{ t('library_empty') }}</p>
+  {% endfor %}
+
+  {% if yt_mode == "artist" %}
+    <div class="library-group">
+      <h2 class="artist-heading">{{ t('library_youtube_section') }}</h2>
+      <ul class="track-list">
+        {{ m.yt_artist_row(yt_data) }}
+      </ul>
+    </div>
+  {% elif yt_mode == "album" %}
+    <div class="library-group">
+      <h2 class="artist-heading">{{ t('library_youtube_section') }}</h2>
+      <ul class="track-list">
+        {{ m.yt_album_row(yt_data) }}
+      </ul>
+    </div>
+  {% elif yt_songs %}
+    <div class="library-group">
+      <h2 class="artist-heading">{{ t('library_youtube_section') }}</h2>
+      <ul class="track-list">
+        {% for r in yt_songs %}
+          {{ m.yt_track_row(r) }}
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+</div>

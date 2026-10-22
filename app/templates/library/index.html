@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}{{ t('nav_library') }}{% endblock %}
+{% block header_title %}{{ t('nav_library') }}{% endblock %}
+{% block header_back %}<img class="app-header-logo" src="{{ url_for('static', filename='brand/header-mascot.png') }}" alt="">{% endblock %}
+{% block content %}
+<div class="library-screen" hx-history="false">
+  <div class="screen-toolbar">
+    <input type="search" name="q" enterkeyhint="search" value="{{ q }}" placeholder="{{ t('library_search_placeholder') }}"
+           class="search-input"
+           hx-get="{{ url_for('library.list_fragment') }}"
+           hx-trigger="keyup changed delay:400ms, search"
+           hx-target="#library-list" hx-select="#library-list" hx-swap="outerHTML"
+           hx-include="[name='sort']:checked">
+
+    <button type="button" class="icon-btn" onclick="document.getElementById('sort-modal').showModal()" title="{{ t('library_sort_title') }}">{{ icon('arrow-up-down') }}</button>
+  </div>
+
+  <dialog id="sort-modal" class="app-modal">
+    <div class="app-modal-header">
+      <h2>{{ icon('arrow-up-down') }} {{ t('library_sort_title') }}</h2>
+      <button type="button" class="app-modal-close" onclick="document.getElementById('sort-modal').close()" aria-label="{{ t('common_back') }}">{{ icon('x') }}</button>
+    </div>
+    <div class="app-modal-body">
+      <form class="sort-form"
+            hx-get="{{ url_for('library.list_fragment') }}"
+            hx-target="#library-list" hx-select="#library-list" hx-swap="outerHTML"
+            hx-include="[name='q']">
+        <input type="hidden" name="save_sort" value="1">
+        <p class="sort-group-label">{{ t('sort_artist') }}</p>
+        <label class="sort-option">
+          <input type="radio" name="sort" value="artist_az" {% if sort == 'artist_az' or not sort %}checked{% endif %}>
+          {{ t('sort_az') }}
+        </label>
+        <label class="sort-option">
+          <input type="radio" name="sort" value="artist_za" {% if sort == 'artist_za' %}checked{% endif %}>
+          {{ t('sort_za') }}
+        </label>
+        <p class="sort-group-label">{{ t('sort_album') }}</p>
+        <label class="sort-option">
+          <input type="radio" name="sort" value="album_az" {% if sort == 'album_az' %}checked{% endif %}>
+          {{ t('sort_az') }}
+        </label>
+        <label class="sort-option">
+          <input type="radio" name="sort" value="album_za" {% if sort == 'album_za' %}checked{% endif %}>
+          {{ t('sort_za') }}
+        </label>
+        <p class="sort-group-label">{{ t('library_favorites') }}</p>
+        <label class="sort-option">
+          <input type="radio" name="sort" value="favorites_az" {% if sort == 'favorites_az' %}checked{% endif %}>
+          {{ t('sort_az') }}
+        </label>
+        <label class="sort-option">
+          <input type="radio" name="sort" value="favorites_za" {% if sort == 'favorites_za' %}checked{% endif %}>
+          {{ t('sort_za') }}
+        </label>
+        <button type="submit" class="btn-primary" onclick="document.getElementById('sort-modal').close()">{{ t('common_ok') }}</button>
+      </form>
+    </div>
+  </dialog>
+
+  {% include "library/_list.html" %}
+</div>
+{% endblock %}

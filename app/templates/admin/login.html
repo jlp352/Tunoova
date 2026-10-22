@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="{{ current_locale() }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ t('admin_login_title') }}</title>
+  <link rel="icon" href="{{ url_for('static', filename='brand/favicon.ico') }}" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='brand/favicon-32.png') }}">
+  <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='brand/favicon-192.png') }}">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='brand/apple-touch-icon.png') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body>
+  <div class="auth-screen">
+    <div class="admin-locale-switch admin-locale-switch-login">
+      <a href="{{ url_for('admin.set_locale', lang='fr') }}" class="{{ 'active' if current_locale() == 'fr' }}">FR</a>
+      <a href="{{ url_for('admin.set_locale', lang='en') }}" class="{{ 'active' if current_locale() == 'en' }}">EN</a>
+    </div>
+    <h1 class="brand-title">{{ t('admin_login_title') }}</h1>
+    {% if error %}
+      <p class="form-error">
+        {% if error[0] == 'locked' %}{{ t('signin_error_locked', minutes=error[1]) }}{% else %}{{ t('signin_error_invalid') }}{% endif %}
+      </p>
+    {% endif %}
+    <form method="post" class="auth-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label for="email">{{ t('signin_email') }}</label>
+      <input type="email" id="email" name="email" required autofocus>
+      <label for="password">{{ t('signin_password') }}</label>
+      <input type="password" id="password" name="password" required>
+      <button type="submit" class="btn-primary">{{ t('signin_submit') }}</button>
+    </form>
+  </div>
+</body>
+</html>

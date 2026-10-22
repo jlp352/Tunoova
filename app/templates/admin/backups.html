@@ -1,0 +1,124 @@
+{% extends "admin/layout.html" %}
+{% block title %}{{ t('admin_backups_tab') }}{% endblock %}
+{% block content_class %}admin-content-wide{% endblock %}
+{% block content %}
+<h1>{{ t('admin_backups_tab') }}</h1>
+<p class="admin-field-hint">{{ t('admin_backups_intro', path=backup_path, days=retention_days) }}</p>
+
+<div class="admin-backups-toolbar">
+  <form method="post" action="{{ url_for('admin.backup_create') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button type="submit" class="btn-primary">{{ icon('database') }} {{ t('admin_backups_create') }}</button>
+  </form>
+  <button type="button" class="btn-primary btn-danger" onclick="document.getElementById('restore-modal').showModal()">
+    {{ icon('upload') }} {{ t('admin_backups_restore_global') }}
+  </button>
+</div>
+
+{% if backups %}
+<div class="admin-table-wrap">
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>{{ t('admin_backups_col_date') }}</th>
+        <th>{{ t('admin_backups_col_kind') }}</th>
+        <th>{{ t('admin_backups_col_db') }}</th>
+        <th>{{ t('admin_backups_col_photos') }}</th>
+        <th>{{ t('admin_col_actions') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for b in backups %}
+        <tr>
+          <td>{{ b.created_at.strftime('%d/%m/%Y %H:%M:%S') }}</td>
+          <td>{{ t('admin_backups_kind_' ~ b.kind) }}</td>
+          <td><a href="{{ url_for('admin.backup_download', name=b.name) }}" title="{{ t('admin_backups_download') }}">{{ b.name }}</a> <span class="admin-field-hint">({{ format_size(b.size) }})</span></td>
+          <td>
+            {% if b.photos_name %}
+              <a href="{{ url_for('admin.backup_download', name=b.photos_name) }}" title="{{ t('admin_backups_download') }}">{{ b.photos_name }}</a> <span class="admin-field-hint">({{ format_size(b.photos_size) }})</span>
+            {% else %}—{% endif %}
+          </td>
+          <td>
+            <div class="admin-table-actions">
+              <a class="btn-link" href="{{ url_for('admin.backup_bundle', name=b.name) }}" title="{{ t('admin_backups_download_hint') }}">{{ t('admin_backups_download') }}</a>
+            </div>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p class="admin-field-hint">{{ t('admin_backups_empty') }}</p>
+{% endif %}
+
+<dialog id="restore-modal" class="app-modal admin-settings-modal">
+  <div class="app-modal-header">
+    <h2>{{ t('admin_backups_restore_global') }}</h2>
+    <button type="button" class="app-modal-close" onclick="this.closest('dialog').close()" aria-label="{{ t('common_back') }}">{{ icon('x') }}</button>
+  </div>
+  <div class="app-modal-body">
+    <form id="restore-form" class="admin-settings-form">
+      <p>{{ t('admin_backups_restore_intro') }}</p>
+      <p class="text-error">{{ t('admin_backups_restore_warning') }}</p>
+      <input type="file" name="file" accept=".zip,application/zip" required>
+      <p id="restore-status" class="admin-field-hint" role="status"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" onclick="this.closest('dialog').close()">{{ t('common_cancel') }}</button>
+        <button type="submit" class="btn-primary btn-danger" id="restore-submit">{{ t('admin_backups_restore') }}</button>
+      </div>
+    </form>
+  </div>
+</dialog>
+
+<script>
+(function () {
+  var form = document.getElementById('restore-form');
+  var status = document.getElementById('restore-status');
+  var submit = document.getElementById('restore-submit');
+  var csrfToken = {{ csrf_token()|tojson }};
+  var texts = {
+    running: {{ t('admin_backups_restore_running')|tojson }},
+    restarting: {{ t('admin_backups_restarting')|tojson }},
+    tooBig: {{ t('admin_backup_upload_too_big')|tojson }},
+    failed: {{ t('admin_backup_restore_error', error='HTTP')|tojson }}
+  };
+
+  function show(message, isError) {
+    status.textContent = message;
+    status.className = isError ? 'text-error' : 'admin-field-hint';
+  }
+
+  // Attend que le service soit relance par systemd, puis recharge la page.
+  function waitForRestart() {
+    setTimeout(function poll() {
+      fetch({{ url_for('admin.backups')|tojson }}, { cache: 'no-store' })
+        .then(function (r) { if (r.ok) { location.reload(); } else { setTimeout(poll, 2000); } })
+        .catch(function () { setTimeout(poll, 2000); });
+    }, 4000);
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    submit.disabled = true;
+    show(texts.running, false);
+    fetch({{ url_for('admin.backup_restore')|tojson }}, {
+      method: 'POST',
+      headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': csrfToken },
+      body: new FormData(form)
+    }).then(function (r) {
+      if (r.status === 413) throw new Error(texts.tooBig);
+      if (!r.ok) throw new Error(texts.failed.replace('HTTP', 'HTTP ' + r.status));
+      return r.json();
+    }).then(function (data) {
+      show(data.message, !data.ok);
+      if (!data.ok) { submit.disabled = false; return; }
+      if (data.restarting) { show(data.message + ' ' + texts.restarting, false); waitForRestart(); }
+    }).catch(function (err) {
+      show(err.message, true);
+      submit.disabled = false;
+    });
+  });
+})();
+</script>
+{% endblock %}

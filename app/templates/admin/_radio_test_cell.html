@@ -1,0 +1,9 @@
+{# Contenu de la colonne "Dernier test" d'une radio (page et reponse du bouton Tester) #}
+{% if r.PlugInStatus == 'ok' %}
+  ✅ <span class="admin-field-hint">{{ r.PlugInStatusDetail or t('admin_plugin_test_empty') }}</span>
+{% elif r.PlugInStatus == 'error' %}
+  <span class="text-error">{{ t('admin_error_prefix') }}{{ r.PlugInStatusDetail }}</span>
+{% else %}
+  —
+{% endif %}
+{% if r.PlugInLastTest %}<br><span class="admin-field-hint">{{ r.PlugInLastTest.strftime('%d/%m/%Y %H:%M') }} UTC</span>{% endif %}

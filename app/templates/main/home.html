@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% macro home_thumb(url, fallback) %}
+  {% if url %}
+    <img class="tile-thumb" src="{{ url }}" alt="" loading="lazy" referrerpolicy="no-referrer"
+         onerror="this.replaceWith(Object.assign(document.createElement('span'), {className: 'tile-thumb tile-thumb-placeholder', textContent: '{{ fallback }}'}))">
+  {% else %}
+    <span class="tile-thumb tile-thumb-placeholder">{{ fallback }}</span>
+  {% endif %}
+{% endmacro %}
+{% block title %}{{ t('home_title') }}{% endblock %}
+{% block header_back %}<img class="app-header-logo" src="{{ url_for('static', filename='brand/header-mascot.png') }}" alt="">{% endblock %}
+{% block header_title %}{{ t('home_title') }}{% endblock %}
+{% block content %}
+<div class="home-screen">
+  <div class="home-tabs">
+    <span class="home-tab home-tab-active">{{ t('home_tab_favorites') }}</span>
+    <span class="home-tab home-tab-disabled">{{ t('home_tab_news') }}</span>
+    <span class="home-tab home-tab-disabled">{{ t('home_tab_for_you') }}</span>
+    <span class="home-tab home-tab-disabled">{{ t('home_tab_hobby') }}</span>
+    <button type="button" class="icon-btn home-order-btn" onclick="document.getElementById('home-order-modal').showModal()" title="{{ t('home_order_title') }}">{{ icon('arrow-up-down') }}</button>
+  </div>
+
+  {% set section_labels = {'podcast': t('home_section_podcasts'), 'radio': t('home_section_radios'), 'music': t('home_section_music')} %}
+  <dialog id="home-order-modal" class="app-modal">
+    <div class="app-modal-header">
+      <h2>{{ icon('arrow-up-down') }} {{ t('home_order_title') }}</h2>
+      <button type="button" class="app-modal-close" onclick="this.closest('dialog').close()" aria-label="{{ t('common_back') }}">{{ icon('x') }}</button>
+    </div>
+    <div class="app-modal-body">
+      <form method="post" action="{{ url_for('main.home_order') }}" class="sort-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <ol class="home-order-list">
+          {% for key in home_order %}
+            <li class="home-order-item">
+              <input type="hidden" name="section" value="{{ key }}">
+              <span class="home-order-name">{{ section_labels[key] }}</span>
+              <button type="button" class="icon-btn home-order-up" title="{{ t('home_order_up') }}"
+                      onclick="var li=this.closest('li'); if (li.previousElementSibling) li.parentNode.insertBefore(li, li.previousElementSibling)">{{ icon('chevron-up') }}</button>
+              <button type="button" class="icon-btn home-order-down" title="{{ t('home_order_down') }}"
+                      onclick="var li=this.closest('li'); if (li.nextElementSibling) li.parentNode.insertBefore(li.nextElementSibling, li)">{{ icon('chevron-down') }}</button>
+            </li>
+          {% endfor %}
+        </ol>
+        <button type="submit" class="btn-primary">{{ t('common_ok') }}</button>
+      </form>
+    </div>
+  </dialog>
+
+  {# Accueil en tuiles, comme les ecrans Podcast/Radio/Music : un titre de
+     section en tuile violette, puis une tuile par element #}
+  {% for key in home_order %}
+    {% if key == 'podcast' %}
+  <section class="home-section">
+    <h2 class="home-section-tile">{{ t('home_section_podcasts') }}</h2>
+    {% for p in top_podcasts %}
+      <div class="radio-card">
+        <a class="radio-play-btn" href="{{ url_for('podcast.detail', podcast_users_id=p.PodcastUsersId) }}">
+          {{ home_thumb(p.LinkImage, '🎙') }}
+          <span class="radio-card-info"><span class="radio-card-title">{{ p.PodcastName }}</span></span>
+        </a>
+        <a class="track-row-chevron" href="{{ url_for('podcast.detail', podcast_users_id=p.PodcastUsersId) }}" aria-label="{{ p.PodcastName }}">{{ icon('chevron-right') }}</a>
+      </div>
+    {% else %}
+      <p class="empty-state">{{ t('home_empty_podcasts') }}</p>
+    {% endfor %}
+  </section>
+    {% elif key == 'radio' %}
+  <section class="home-section">
+    <h2 class="home-section-tile">{{ t('home_section_radios') }}</h2>
+    {% for r in top_radios %}
+      <div class="radio-card">
+        <button type="button" class="radio-play-btn" onclick="tunoovaStartPlayback('{{ url_for('radio.play', radio_users_id=r.RadioUsersId) }}')">
+          {{ home_thumb(r.LinkImage, '📻') }}
+          <span class="radio-card-info">
+            <span class="radio-card-title">{{ r.RadioName }}</span>
+            <span class="radio-live-badge">{{ t('radio_live') }}</span>
+          </span>
+        </button>
+      </div>
+    {% else %}
+      <p class="empty-state">{{ t('home_empty_radios') }}</p>
+    {% endfor %}
+  </section>
+    {% else %}
+  <section class="home-section">
+    <h2 class="home-section-tile">{{ t('home_section_music') }}</h2>
+    {% for a in top_artists %}
+      <div class="radio-card">
+        <a class="radio-play-btn" href="{{ url_for('library.artist_detail', artist_id=a.artist.ArtistId) }}">
+          {{ home_thumb(cover_for(a.artist) or cover_for(a.track), '🎵') }}
+          <span class="radio-card-info"><span class="radio-card-title">{{ a.artist.Name }}</span></span>
+        </a>
+        <a class="track-row-chevron" href="{{ url_for('library.artist_detail', artist_id=a.artist.ArtistId) }}" aria-label="{{ a.artist.Name }}">{{ icon('chevron-right') }}</a>
+      </div>
+    {% else %}
+      <p class="empty-state">{{ t('home_empty_music') }}</p>
+    {% endfor %}
+  </section>
+    {% endif %}
+  {% endfor %}
+</div>
+{% endblock %}

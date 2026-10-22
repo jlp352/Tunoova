@@ -1,0 +1,282 @@
+{% extends "base.html" %}
+{% block title %}{{ t('common_profile') }}{% endblock %}
+{% block header_title %}{{ t('common_profile') }}{% endblock %}
+{% block header_back %}
+  <a class="icon-btn back-btn" href="{{ next_url }}" aria-label="{{ t('common_back') }}">{{ icon('arrow-left') }}</a>
+{% endblock %}
+{% block content %}
+{% set fullname_value = form_values.get('fullname') if form_values else current_user.FullName %}
+{% set email_value = form_values.get('email') if form_values else current_user.Email %}
+{% set notifications_checked = ('notifications' in form_values) if form_values else current_user.Notifications %}
+{% set age_range_value = form_values.get('age_range', '') if form_values else (current_user.AgeRange or '') %}
+{% set country_value = form_values.get('country', '') if form_values else (current_user.Country or '') %}
+{% set hobby_values = form_values.getlist('hobby') if form_values else current_user.hobby_list() %}
+{% set genre_values = form_values.getlist('music_genre') if form_values else current_user.music_genre_list() %}
+{% set langue_value = form_values.get('langue', current_user.Langue) if form_values else current_user.Langue %}
+
+{% if error %}<p class="form-error">{{ t(error) }}</p>{% endif %}
+<div id="profile-save-status" aria-live="polite"></div>
+
+<form id="userprofile-form" method="post" enctype="multipart/form-data"
+      hx-post="{{ url_for('userprofile.index') }}" hx-trigger="change delay:400ms" hx-encoding="multipart/form-data"
+      hx-target="#profile-save-status" hx-select=".form-error,.profile-save-flash" hx-swap="innerHTML" hx-validate="true" class="firstlogin-form">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="next" value="{{ next_url }}">
+
+  <div class="userprofile-photo-current">
+    <label for="photo" class="userprofile-photo-picker" aria-label="{{ t('firstlogin_photo') }}">
+      {% if current_user.Photo %}
+        <img class="profile-thumb userprofile-photo-preview" id="profile-photo-preview" src="{{ url_for('media.profile_photo') }}" alt="">
+      {% else %}
+        <span class="profile-thumb profile-thumb-placeholder userprofile-photo-preview" id="profile-photo-preview">{{ current_user.FullName[:1] }}</span>
+      {% endif %}
+      <span class="userprofile-photo-camera">{{ icon('camera') }}</span>
+    </label>
+  </div>
+  <input type="file" id="photo" name="photo" accept="image/*" class="visually-hidden" onchange="tunoovaPreviewProfilePhoto(this)">
+
+  <label for="fullname">{{ t('firstlogin_fullname') }}</label>
+  <input type="text" id="fullname" name="fullname" value="{{ fullname_value }}" required
+         data-required-error="{{ t('userprofile_error_fullname_required') }}">
+
+  <label for="email">{{ t('signin_email') }}</label>
+  <input type="email" id="email" name="email" value="{{ email_value }}" required
+         data-required-error="{{ t('userprofile_error_email_required') }}">
+
+  <label class="checkbox-label">
+    <input type="checkbox" name="notifications" {% if notifications_checked %}checked{% endif %}>
+    {{ t('firstlogin_notifications') }}
+  </label>
+
+  <label id="langue-label">{{ t('firstlogin_language') }}</label>
+  <div class="dropdown-checklist">
+    <button type="button" class="dropdown-checklist-toggle" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="langue-label">
+      <span class="dropdown-checklist-summary" data-placeholder="-"></span>
+      {{ icon('chevron-down') }}
+    </button>
+    <div class="dropdown-checklist-panel" role="listbox" aria-labelledby="langue-label" hidden>
+      <label class="checkbox-listbox-item">
+        <input type="radio" name="langue" value="fr" {% if langue_value == 'fr' %}checked{% endif %}>
+        Français
+      </label>
+      <label class="checkbox-listbox-item">
+        <input type="radio" name="langue" value="en" {% if langue_value == 'en' %}checked{% endif %}>
+        English
+      </label>
+    </div>
+  </div>
+
+  <label id="country-label">{{ t('firstlogin_country') }}</label>
+  <div class="dropdown-checklist">
+    <button type="button" class="dropdown-checklist-toggle" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="country-label"
+            data-required-error="{{ t('userprofile_error_country_required') }}">
+      <span class="dropdown-checklist-summary" data-placeholder="-"></span>
+      {{ icon('chevron-down') }}
+    </button>
+    <input type="text" class="dropdown-required-proxy" required aria-hidden="true" tabindex="-1" value="{{ country_value }}">
+    <div class="dropdown-checklist-panel" role="listbox" aria-labelledby="country-label" hidden>
+      {% for c in countries %}
+        <label class="checkbox-listbox-item">
+          <input type="radio" name="country" value="{{ c.CountryName }}" {% if country_value == c.CountryName %}checked{% endif %}>
+          {{ t_choice('country', c.CountryName) }}
+        </label>
+      {% endfor %}
+    </div>
+  </div>
+
+  <label id="age-range-label">{{ t('firstlogin_age_range') }}</label>
+  <div class="dropdown-checklist">
+    <button type="button" class="dropdown-checklist-toggle" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="age-range-label"
+            data-required-error="{{ t('userprofile_error_age_range_required') }}">
+      <span class="dropdown-checklist-summary" data-placeholder="-"></span>
+      {{ icon('chevron-down') }}
+    </button>
+    <input type="text" class="dropdown-required-proxy" required aria-hidden="true" tabindex="-1" value="{{ age_range_value }}">
+    <div class="dropdown-checklist-panel" role="listbox" aria-labelledby="age-range-label" hidden>
+      {% for ar in age_ranges %}
+        <label class="checkbox-listbox-item">
+          <input type="radio" name="age_range" value="{{ ar.AgeRange }}" {% if age_range_value == ar.AgeRange %}checked{% endif %}>
+          {{ t_choice('age_range', ar.AgeRange) }}{% if ar.Description %} ({{ ar.Description }}){% endif %}
+        </label>
+      {% endfor %}
+    </div>
+  </div>
+
+  <label id="music-genre-label">{{ t('firstlogin_music_genre') }}</label>
+  <div class="dropdown-checklist">
+    <button type="button" class="dropdown-checklist-toggle" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="music-genre-label">
+      <span class="dropdown-checklist-summary" data-placeholder="-"></span>
+      {{ icon('chevron-down') }}
+    </button>
+    <div class="dropdown-checklist-panel" role="group" aria-labelledby="music-genre-label" hidden>
+      {% for g in music_genres %}
+        <label class="checkbox-listbox-item">
+          <input type="checkbox" name="music_genre" value="{{ g.MusicGenreName }}" {% if g.MusicGenreName in genre_values %}checked{% endif %}>
+          {{ t_choice('genre', g.MusicGenreName) }}
+        </label>
+      {% endfor %}
+    </div>
+  </div>
+
+  <label id="hobby-label">{{ t('firstlogin_hobby') }}</label>
+  <div class="dropdown-checklist">
+    <button type="button" class="dropdown-checklist-toggle" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="hobby-label">
+      <span class="dropdown-checklist-summary" data-placeholder="-"></span>
+      {{ icon('chevron-down') }}
+    </button>
+    <div class="dropdown-checklist-panel" role="group" aria-labelledby="hobby-label" hidden>
+      {% for h in hobbies %}
+        <label class="checkbox-listbox-item">
+          <input type="checkbox" name="hobby" value="{{ h.HobbyName }}" {% if h.HobbyName in hobby_values %}checked{% endif %}>
+          {{ t_choice('hobby', h.HobbyName) }}
+        </label>
+      {% endfor %}
+    </div>
+  </div>
+</form>
+
+<dialog id="field-error-modal" class="app-modal">
+  <div class="app-modal-header">
+    <h2>{{ t('userprofile_required_field_title') }}</h2>
+    <button type="button" class="app-modal-close" onclick="this.closest('dialog').close()" aria-label="{{ t('common_back') }}">{{ icon('x') }}</button>
+  </div>
+  <div class="app-modal-body">
+    <p id="field-error-message"></p>
+    <div class="modal-actions">
+      <button type="button" class="btn-dark" onclick="this.closest('dialog').close()">{{ t('common_ok') }}</button>
+    </div>
+  </div>
+</dialog>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function tunoovaPreviewProfilePhoto(inputEl) {
+  const file = inputEl.files && inputEl.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    let el = document.getElementById('profile-photo-preview');
+    if (el.tagName !== 'IMG') {
+      const img = document.createElement('img');
+      img.id = 'profile-photo-preview';
+      img.className = 'profile-thumb userprofile-photo-preview';
+      img.alt = '';
+      el.replaceWith(img);
+      el = img;
+    }
+    el.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function showFieldError(message, refocus) {
+  const modal = document.getElementById("field-error-modal");
+  document.getElementById("field-error-message").textContent = message;
+  modal.showModal();
+  function handleClose() {
+    modal.removeEventListener("close", handleClose);
+    if (refocus) refocus();
+  }
+  modal.addEventListener("close", handleClose);
+}
+
+document.querySelectorAll("input[data-required-error]").forEach(function (input) {
+  input.addEventListener("blur", function () {
+    if (input.value.trim() === "") {
+      showFieldError(input.dataset.requiredError, function () {
+        input.focus();
+      });
+    }
+  });
+});
+
+function closeDropdownPanel(dropdown, checkRequired) {
+  const panel = dropdown.querySelector(".dropdown-checklist-panel");
+  const toggle = dropdown.querySelector(".dropdown-checklist-toggle");
+  const wasOpen = !panel.hidden;
+  panel.hidden = true;
+  panel.classList.remove("dropdown-checklist-panel-up");
+  toggle.setAttribute("aria-expanded", "false");
+
+  if (checkRequired && wasOpen && toggle.dataset.requiredError) {
+    const proxy = dropdown.querySelector(".dropdown-required-proxy");
+    if (proxy && proxy.value === "") {
+      showFieldError(toggle.dataset.requiredError, function () {
+        toggle.focus();
+        toggle.click();
+      });
+    }
+  }
+}
+
+document.querySelectorAll(".dropdown-checklist").forEach(function (dropdown) {
+  const toggle = dropdown.querySelector(".dropdown-checklist-toggle");
+  const panel = dropdown.querySelector(".dropdown-checklist-panel");
+  const summary = dropdown.querySelector(".dropdown-checklist-summary");
+  const requiredProxy = dropdown.querySelector(".dropdown-required-proxy");
+
+  const isSingleSelect = !!panel.querySelector('input[type="radio"]');
+
+  function updateSummary() {
+    const checkedInputs = Array.from(panel.querySelectorAll("input:checked")).filter((el) => el.value !== "");
+    const labels = checkedInputs.map((el) => el.closest("label").textContent.trim());
+    summary.textContent = labels.length ? labels.join(", ") : summary.dataset.placeholder;
+    if (requiredProxy) {
+      requiredProxy.value = checkedInputs.length ? checkedInputs[0].value : "";
+    }
+  }
+
+  toggle.addEventListener("click", function () {
+    const willOpen = panel.hidden;
+    if (!willOpen) {
+      closeDropdownPanel(dropdown, true);
+      return;
+    }
+    document.querySelectorAll(".dropdown-checklist").forEach(function (other) {
+      if (other !== dropdown) closeDropdownPanel(other, true);
+    });
+    panel.hidden = false;
+    toggle.setAttribute("aria-expanded", "true");
+    const spaceBelow = window.innerHeight - toggle.getBoundingClientRect().bottom;
+    if (spaceBelow < panel.offsetHeight + 16) {
+      panel.classList.add("dropdown-checklist-panel-up");
+    }
+  });
+
+  panel.addEventListener("change", function () {
+    updateSummary();
+    if (isSingleSelect) {
+      panel.hidden = true;
+      panel.classList.remove("dropdown-checklist-panel-up");
+      toggle.setAttribute("aria-expanded", "false");
+    }
+  });
+  updateSummary();
+});
+
+document.addEventListener("click", function (e) {
+  document.querySelectorAll(".dropdown-checklist").forEach(function (dropdown) {
+    if (!dropdown.contains(e.target)) {
+      closeDropdownPanel(dropdown, true);
+    }
+  });
+});
+
+var userprofileForm = document.getElementById("userprofile-form");
+
+document.querySelectorAll('input[name="langue"]').forEach(function (radio) {
+  radio.addEventListener("change", function () {
+    htmx
+      .ajax("POST", userprofileForm.getAttribute("hx-post"), {
+        source: userprofileForm,
+        target: "#profile-save-status",
+        swap: "innerHTML",
+      })
+      .then(function () {
+        window.location.reload();
+      });
+  });
+});
+</script>
+{% endblock %}

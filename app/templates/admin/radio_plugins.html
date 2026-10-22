@@ -1,0 +1,175 @@
+{% extends "admin/layout.html" %}
+{% block title %}{{ t('admin_plugins_title') }}{% endblock %}
+{% block content_class %}admin-content-wide{% endblock %}
+{% block content %}
+<h1>{{ t('admin_plugins_title') }}</h1>
+<p class="admin-field-hint">{{ t('admin_plugins_intro') }}</p>
+
+{% for item in plugins %}
+  {# Formulaire "hors table", cf. admin/jobs.html #}
+  <form id="plugin-form-{{ item.p.RadioPlugInId }}" method="post" action="{{ url_for('admin.radio_plugin_update', plugin_id=item.p.RadioPlugInId) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  </form>
+{% endfor %}
+
+<div class="admin-table-wrap">
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>{{ t('admin_plugin_col_name') }}</th>
+        <th>{{ t('admin_plugin_col_script') }}</th>
+        <th>{{ t('admin_col_enabled') }}</th>
+        <th>{{ t('admin_plugin_col_key') }}</th>
+        <th>{{ t('admin_plugin_col_radios') }}</th>
+        <th>{{ t('admin_plugin_col_status') }}</th>
+        <th>{{ t('admin_col_actions') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in plugins %}
+        {% set p = item.p %}
+        <tr>
+          <td>
+            {{ p.PlugInName }}
+            {% if item.stations %}
+              <details class="admin-plugin-stations">
+                <summary>{{ t('admin_plugin_stations_link', count=item.stations|length) }}</summary>
+                <ul>
+                  {% for name, ref in item.stations %}
+                    <li>{{ name }} <span class="admin-field-hint">({{ ref }})</span></li>
+                  {% endfor %}
+                </ul>
+              </details>
+            {% endif %}
+          </td>
+          <td><code>{{ p.ScriptName }}</code> v{{ p.Version }}</td>
+          <td><input type="checkbox" name="enabled" form="plugin-form-{{ p.RadioPlugInId }}" {{ "checked" if p.Enabled else "" }}></td>
+          <td>
+            <input type="password" name="api_key" form="plugin-form-{{ p.RadioPlugInId }}" class="admin-cron-input"
+                   placeholder="{{ item.masked_key or t('admin_plugin_no_key') }}" autocomplete="new-password">
+            {% if item.masked_key %}
+              <label class="admin-field-hint"><input type="checkbox" name="clear_key" form="plugin-form-{{ p.RadioPlugInId }}"> {{ t('admin_plugin_clear_key') }}</label>
+            {% endif %}
+          </td>
+          <td>{{ item.radio_count }}</td>
+          <td>
+            {% if p.Status == 'ok' %}
+              ✅ <span class="admin-field-hint">{{ p.StatusDetail or '' }}</span>
+            {% elif p.Status == 'error' %}
+              <span class="text-error">{{ t('admin_error_prefix') }}{{ p.StatusDetail }}</span>
+            {% else %}
+              —
+            {% endif %}
+            {% if p.LastCheck %}<br><span class="admin-field-hint">{{ p.LastCheck.strftime('%d/%m/%Y %H:%M') }} UTC</span>{% endif %}
+          </td>
+          <td class="admin-table-actions">
+            <button type="submit" form="plugin-form-{{ p.RadioPlugInId }}" class="btn-link">{{ t('common_save') }}</button>
+            <form method="post" action="{{ url_for('admin.radio_plugin_test', plugin_id=p.RadioPlugInId) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn-link">{{ t('admin_plugin_test') }}</button>
+            </form>
+            {% if item.can_rollback %}
+              <form method="post" action="{{ url_for('admin.radio_plugin_rollback', plugin_id=p.RadioPlugInId) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn-link">{{ t('admin_plugin_rollback', version=p.Version - 1) }}</button>
+              </form>
+            {% endif %}
+            <form method="post" action="{{ url_for('admin.radio_plugin_delete', plugin_id=p.RadioPlugInId) }}"
+                  data-confirm="{{ t('admin_plugin_delete_confirm', name=p.PlugInName, count=item.radio_count) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn-link btn-link-danger">{{ t('common_delete') }}</button>
+            </form>
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="7" class="empty-state">{{ t('admin_plugins_empty') }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<h2>{{ t('admin_plugin_upload_title') }}</h2>
+<p class="admin-field-hint">{{ t('admin_plugin_upload_hint') }}</p>
+<form method="post" action="{{ url_for('admin.radio_plugin_upload') }}" enctype="multipart/form-data" class="admin-settings-form">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <label>
+    {{ t('admin_plugin_upload_file') }}
+    <input type="file" name="script" accept=".py" required>
+  </label>
+  <label>
+    {{ t('admin_plugin_col_key') }}
+    <input type="password" name="api_key" autocomplete="new-password" placeholder="{{ t('admin_plugin_optional') }}">
+  </label>
+  <div class="admin-settings-buttons">
+    <button type="submit" class="btn-primary">{{ t('admin_plugin_upload_btn') }}</button>
+  </div>
+</form>
+
+<h2 id="radios">{{ t('admin_plugin_radios_title') }}</h2>
+<div class="admin-table-wrap">
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>{{ t('admin_plugin_col_radio') }}</th>
+        <th>{{ t('admin_plugin_col_plugin') }}</th>
+        <th>{{ t('admin_plugin_col_ref') }}</th>
+        <th>{{ t('admin_plugin_col_status') }}</th>
+        <th>{{ t('admin_col_actions') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in radios %}
+        <tr id="radio-{{ r.RadioId }}">
+          <td>{{ r.RadioName }}</td>
+          <td>{{ r.plugin.PlugInName if r.plugin else t('admin_plugin_none') }}</td>
+          <td>{{ r.PlugInRef or '—' }}</td>
+          <td class="radio-test-cell">{% include "admin/_radio_test_cell.html" %}</td>
+          <td class="admin-table-actions">
+            {% if r.plugin %}
+              <form method="post" class="radio-test-form" action="{{ url_for('admin.radio_plugin_test_radio', radio_id=r.RadioId) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn-link">{{ t('admin_plugin_test') }}</button>
+              </form>
+            {% else %}
+              —
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script>
+(function () {
+  // Bouton Tester d'une radio : resultat inscrit dans la colonne "Dernier
+  // test" de la ligne, sans recharger la page (ni message en haut).
+  document.querySelectorAll('.radio-test-form').forEach(function (form) {
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var button = form.querySelector('button');
+      var cell = form.closest('tr').querySelector('.radio-test-cell');
+      var label = button.textContent;
+      button.disabled = true;
+      button.textContent = '…';
+      fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        credentials: 'same-origin',
+      })
+        .then(function (resp) {
+          if (!resp.ok) throw new Error('HTTP ' + resp.status);
+          return resp.text();
+        })
+        .then(function (html) { cell.innerHTML = html; })
+        .catch(function () { form.submit(); })  // repli : envoi classique
+        .finally(function () {
+          button.disabled = false;
+          button.textContent = label;
+        });
+    });
+  });
+})();
+</script>
+{% endblock %}

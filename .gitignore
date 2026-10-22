@@ -1,0 +1,16 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+.env
+db/*
+!db/.gitkeep
+!db/seed.py
+mp3/*
+!mp3/.gitkeep
+
+# Versions precedentes des plug-ins radio (upload Admin)
+radio_plugins/old/
+
+# Rapports de scripts/audit.sh
+scripts/audit-reports/

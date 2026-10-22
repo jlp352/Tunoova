@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% import "library/_macros.html" as m %}
+{% block title %}{{ t('library_top_tracks') }}{% endblock %}
+{% block header_back %}
+  <a class="icon-btn back-btn" href="{{ back_url }}" aria-label="{{ t('common_back') }}">{{ icon('arrow-left') }}</a>
+{% endblock %}
+{% block header_title %}{{ t('library_top_tracks') }}{% endblock %}
+{% block content %}
+<div class="library-screen">
+  <div class="library-detail-header">
+    <h2 class="library-detail-title">{{ artist.Name }}</h2>
+    <p class="library-detail-subtitle">{{ t('library_top_tracks') }}</p>
+  </div>
+  <ul class="track-list">
+    {% set queue = tracks|map(attribute='TrackId')|join(',') %}
+    {% for track in tracks %}
+      {{ m.top_track_li(track, track.TrackId in new_ids, queue) }}
+    {% else %}
+      <li class="track-item empty-state">{{ t('library_no_tracks') }}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if autoplay_url %}
+<script>
+// Voir le commentaire equivalent dans library/album.html.
+(function tunoovaTryAutoplay() {
+  if (typeof tunoovaAutoplayOnce === "function") {
+    tunoovaAutoplayOnce({{ autoplay_url|tojson }});
+  } else {
+    setTimeout(tunoovaTryAutoplay, 10);
+  }
+})();
+</script>
+{% endif %}
+{% endblock %}

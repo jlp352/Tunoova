@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}{{ t('nav_notifications') }}{% endblock %}
+{% block header_title %}{{ t('nav_notifications') }}{% endblock %}
+{% block header_back %}<img class="app-header-logo" src="{{ url_for('static', filename='brand/header-mascot.png') }}" alt="">{% endblock %}
+{% block content %}
+<div class="notifications-screen">
+  <div class="screen-toolbar notifications-toolbar">
+    <button type="button" class="icon-btn" onclick="document.getElementById('clear-notifications-modal').showModal()" title="{{ t('notifications_clear_all') }}">{{ icon('trash-2') }}</button>
+  </div>
+
+  <ul class="track-list">
+    {% for item in items %}
+      <li class="track-item">
+        {% if item.cover_url %}
+          <img class="tile-thumb" src="{{ item.cover_url }}" alt=""
+               onerror="this.replaceWith(Object.assign(document.createElement('span'), {className: 'tile-thumb tile-thumb-placeholder', textContent: {{ item.placeholder|tojson }}}))">
+        {% elif item.image_url %}
+          <img class="tile-thumb" src="{{ item.image_url }}" alt="">
+        {% else %}
+          <span class="tile-thumb tile-thumb-placeholder">{{ item.placeholder }}</span>
+        {% endif %}
+        <div class="track-info">
+          <span class="track-title">{{ item.bold }}</span>
+          <span class="track-subtitle">{{ item.subtitle }}</span>
+        </div>
+        {% if item.action_kind == 'play' %}
+          <a href="#" class="add-result-action" onclick="tunoovaStartPlayback('{{ item.action_url }}'); return false;">{{ t('common_listen') }}</a>
+        {% elif item.action_kind == 'link' %}
+          <a href="{{ item.action_url }}" class="add-result-action">{{ t('notifications_view_album') }}</a>
+        {% endif %}
+        <span class="badge badge-new">New</span>
+      </li>
+    {% else %}
+      <li class="track-item empty-state">{{ t('notifications_empty') }}</li>
+    {% endfor %}
+  </ul>
+
+  <dialog id="clear-notifications-modal" class="app-modal">
+    <div class="app-modal-header">
+      <h2>{{ t('notifications_clear_all') }}</h2>
+      <button type="button" class="app-modal-close" onclick="this.closest('dialog').close()" aria-label="{{ t('common_back') }}">{{ icon('x') }}</button>
+    </div>
+    <div class="app-modal-body">
+      <p>{{ t('notifications_clear_confirm') }}</p>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" onclick="this.closest('dialog').close()">{{ t('common_cancel') }}</button>
+        <form method="post" action="{{ url_for('notifications.clear_all') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="btn-dark">{{ t('common_ok') }}</button>
+        </form>
+      </div>
+    </div>
+  </dialog>
+</div>
+{% endblock %}

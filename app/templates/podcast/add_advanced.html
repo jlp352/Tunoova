@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}{{ t('podcast_advanced') }}{% endblock %}
+{% block header_title %}{{ t('podcast_advanced') }}{% endblock %}
+{% block content %}
+{% if error %}<p class="form-error">{{ error }}</p>{% endif %}
+<form method="post" class="auth-form">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <label for="name">{{ t('podcast_field_name') }}</label>
+  <input type="text" id="name" name="name" value="{{ values.get('name', '') }}" required>
+
+  <label for="feed_url">{{ t('podcast_field_rss') }}</label>
+  <input type="url" id="feed_url" name="feed_url" value="{{ values.get('feed_url', '') }}" required>
+
+  <label for="image_url">{{ t('podcast_field_image') }}</label>
+  <input type="url" id="image_url" name="image_url" value="{{ values.get('image_url', '') }}">
+
+  <label for="episode_filter" class="field-label-help">
+    {{ t('podcast_field_filter') }}
+    <button type="button" class="help-icon-btn" onclick="document.getElementById('filter-help-bubble').classList.toggle('visible')" aria-label="{{ t('common_help') }}">{{ icon('circle-help') }}</button>
+  </label>
+  <ul id="filter-help-bubble" class="help-bubble">
+    <li>{{ t('podcast_filter_help_max') }}</li>
+    <li>{{ t('podcast_filter_help_contain') }}</li>
+    <li>{{ t('podcast_filter_help_exclude') }}</li>
+  </ul>
+  <input type="text" id="episode_filter" name="episode_filter" value="{{ values.get('episode_filter', '') }}">
+
+  <button type="submit" class="btn-primary">{{ t('common_add') }}</button>
+</form>
+{% endblock %}

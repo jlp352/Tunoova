@@ -1,0 +1,65 @@
+{% extends "admin/layout.html" %}
+{% block title %}{{ t('admin_db_title') }}{% endblock %}
+{% block content_class %}admin-content-wide{% endblock %}
+{% block content %}
+<h1>{{ t('admin_db_title') }}</h1>
+
+<div class="admin-table-wrap">
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>
+          <a class="admin-sort-link" href="{{ url_for('admin.db_tables', sort_field='name', sort_dir=('desc' if sort_field == 'name' and sort_dir == 'asc' else 'asc')) }}">
+            {{ t('admin_db_col_table') }}
+            {% if sort_field == 'name' %}
+              {{ icon('chevron-down', 'admin-sort-icon admin-sort-icon-active' ~ (' admin-sort-asc' if sort_dir == 'asc' else '')) }}
+            {% else %}
+              {{ icon('arrow-up-down', 'admin-sort-icon') }}
+            {% endif %}
+          </a>
+        </th>
+        <th>
+          <a class="admin-sort-link" href="{{ url_for('admin.db_tables', sort_field='category', sort_dir=('desc' if sort_field == 'category' and sort_dir == 'asc' else 'asc')) }}">
+            {{ t('admin_db_col_category') }}
+            {% if sort_field == 'category' %}
+              {{ icon('chevron-down', 'admin-sort-icon admin-sort-icon-active' ~ (' admin-sort-asc' if sort_dir == 'asc' else '')) }}
+            {% else %}
+              {{ icon('arrow-up-down', 'admin-sort-icon') }}
+            {% endif %}
+          </a>
+        </th>
+        <th>{{ t('admin_db_col_description') }}</th>
+        <th>
+          <a class="admin-sort-link" href="{{ url_for('admin.db_tables', sort_field='count', sort_dir=('desc' if sort_field == 'count' and sort_dir == 'asc' else 'asc')) }}">
+            {{ t('admin_db_col_rows') }}
+            {% if sort_field == 'count' %}
+              {{ icon('chevron-down', 'admin-sort-icon admin-sort-icon-active' ~ (' admin-sort-asc' if sort_dir == 'asc' else '')) }}
+            {% else %}
+              {{ icon('arrow-up-down', 'admin-sort-icon') }}
+            {% endif %}
+          </a>
+        </th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% set ns = namespace(current_category=None) %}
+      {% for table in tables %}
+        {% if sort_field == 'category' and table.category != ns.current_category %}
+          {% set ns.current_category = table.category %}
+          <tr class="admin-table-group-row"><td colspan="5">{{ table.category }}</td></tr>
+        {% endif %}
+        <tr>
+          <td>{{ table.name }}</td>
+          <td>{{ table.category }}</td>
+          <td class="admin-table-description">{{ table.description }}</td>
+          <td>{{ table.count }}</td>
+          <td class="admin-table-actions">
+            <a href="{{ url_for('admin.db_table_rows', table_name=table.name) }}" class="btn-link">{{ t('admin_db_open') }}</a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% set show_chrome = false %}
+{% block title %}{{ t('signin_terms_title') }} - {{ t('app_name') }}{% endblock %}
+{% block content %}
+<div class="legal-page">
+  <div class="legal-page-header">
+    <button type="button" class="icon-btn back-btn" onclick="history.back()" aria-label="{{ t('common_back') }}">{{ icon('arrow-left') }}</button>
+    <img class="legal-page-mascot" src="{{ url_for('static', filename='brand/header-mascot.png') }}" alt="">
+    <h1>{{ t('signin_terms_title') }}</h1>
+  </div>
+
+  <div class="legal-page-body">
+  {% if current_locale() == 'fr' %}
+  <p class="legal-updated">Dernière mise à jour : 22/09/2026</p>
+
+  <h2>1. Objet et acceptation</h2>
+  <p>Les présentes Conditions Générales d'Utilisation (« CGU ») encadrent l'utilisation de l'application Tunoova, un lecteur multimédia permettant :</p>
+  <ul>
+    <li>l'écoute de radios en direct (live) ;</li>
+    <li>l'écoute de podcasts ;</li>
+    <li>la lecture des fichiers audio personnels (MP3, etc.) fournis par l'utilisateur ;</li>
+    <li>la lecture de morceaux disponibles sur internet.</li>
+  </ul>
+  <p>En accédant à cette instance de l'Application ou en l'utilisant, vous reconnaissez avoir lu, compris et accepté les présentes CGU. Si vous n'acceptez pas ces conditions, n'utilisez pas l'Application.</p>
+
+  <h2>2. Usage strictement personnel et familial</h2>
+  <p>L'Application est destinée à un <strong>usage strictement personnel et familial</strong>.</p>
+  <p>En l'utilisant, vous vous engagez à :</p>
+  <ul>
+    <li>ne l'utiliser que dans un cadre privé, pour vos besoins personnels ou ceux de votre foyer ;</li>
+    <li><strong>ne faire aucun usage commercial, professionnel ou lucratif</strong>, direct ou indirect (par exemple : service payant, monétisation publicitaire, diffusion publique, revente ou mise à disposition d'accès contre rémunération) ;</li>
+    <li>ne pas mettre l'instance à disposition du public ou d'un nombre indéterminé d'utilisateurs.</li>
+  </ul>
+  <p>Tout usage commercial de cette instance est interdit, sauf autorisation expresse de son Opérateur.</p>
+  <p>La présente restriction concerne <strong>l'utilisation de cette instance</strong>. Le code source du logiciel Tunoova est distribué séparément sous <strong>licence PolyForm Noncommercial 1.0.0</strong>. Les droits d'utilisation, de modification et de redistribution du code source sont exclusivement définis par cette licence.</p>
+
+  <h2>3. Nature auto-hébergée du service</h2>
+  <p>L'Application est un logiciel <strong>auto-hébergé</strong>. Chaque instance est installée et exploitée de manière autonome par un opérateur, qui peut être vous-même ou un tiers.</p>
+  <ul>
+    <li>L'auteur du logiciel se limite à <strong>distribuer le code source</strong> ; il n'exploite aucun service central, ne collecte aucune donnée à distance et n'a aucun contrôle sur les instances individuelles.</li>
+    <li>L'Opérateur de cette instance est responsable de sa mise à disposition, de sa configuration, de sa sécurité et de sa conformité.</li>
+    <li>Toute réclamation relative à cette instance doit être adressée à l'Opérateur.</li>
+  </ul>
+
+  <h2>4. Licence du logiciel</h2>
+  <p>Le code source de l'Application est publié sous <strong>licence PolyForm Noncommercial 1.0.0</strong> et disponible sur GitHub.</p>
+  <p>Les droits d'utilisation, de modification et de redistribution du code source sont exclusivement définis par cette licence.</p>
+  <p>Les présentes CGU portent en complément sur <strong>l'utilisation de cette instance</strong> du service.</p>
+
+  <h2>5. Contenus de l'utilisateur</h2>
+  <p>Vous pouvez importer et lire vos propres fichiers audio via l'Application.</p>
+  <ul>
+    <li>Vous conservez l'entière propriété de vos fichiers.</li>
+    <li>Vous déclarez disposer des droits nécessaires pour les stocker et les écouter via l'Application.</li>
+    <li>L'Opérateur ne revendique aucun droit sur vos fichiers et ne les utilise que pour vous en permettre la lecture.</li>
+  </ul>
+
+  <h2>6. Contenus et services tiers</h2>
+  <p>L'Application permet d'accéder à des contenus fournis par des tiers : flux de radios, hébergeurs de podcasts, et YouTube / YouTube Music.</p>
+  <p>Ces contenus ne sont <strong>ni détenus, ni hébergés, ni contrôlés</strong> par l'Application ou son auteur.</p>
+  <p>Vous vous engagez à :</p>
+  <ul>
+    <li>respecter les conditions d'utilisation propres à chaque service tiers ;</li>
+    <li>respecter le droit d'auteur et les droits voisins applicables aux œuvres écoutées ;</li>
+    <li>n'utiliser l'Application qu'à des fins licites.</li>
+  </ul>
+  <p><strong>L'accès à des contenus tiers, en particulier via YouTube, peut, selon l'usage, contrevenir aux conditions d'utilisation de ces services ou au droit applicable. Vous êtes responsable de la légalité de votre utilisation.</strong></p>
+  <p>Dans les limites autorisées par la loi applicable, l'auteur et l'Opérateur ne sauraient être tenus responsables des contenus, services ou conditions d'utilisation imposés par les services tiers.</p>
+
+  <h2>7. Usage acceptable</h2>
+  <p>Vous vous engagez à ne pas :</p>
+  <ul>
+    <li>utiliser l'Application à des fins illégales, frauduleuses ou commerciales (voir section 2) ;</li>
+    <li>tenter de contourner les mesures de sécurité de l'instance ;</li>
+    <li>porter atteinte au fonctionnement de l'instance ou des services tiers (par exemple par des requêtes automatisées abusives) ;</li>
+    <li>utiliser l'Application pour enfreindre les droits de propriété intellectuelle de tiers.</li>
+  </ul>
+
+  <h2>8. Disponibilité et responsabilité de l'Opérateur</h2>
+  <p>L'Application est fournie « en l'état ».</p>
+  <p>L'Opérateur ne garantit aucune disponibilité continue et peut suspendre, modifier ou interrompre l'instance à tout moment, sans préavis.</p>
+  <p>L'Opérateur est responsable du fonctionnement, de la configuration, de la sécurité et de la disponibilité de l'instance qu'il exploite.</p>
+
+  <h2>9. Exclusion de garanties</h2>
+  <p>Conformément à la licence PolyForm Noncommercial 1.0.0, <strong>le logiciel est fourni « TEL QUEL », sans aucune garantie d'aucune sorte</strong>, expresse ou implicite, y compris, sans s'y limiter, les garanties de qualité marchande, d'adéquation à un usage particulier et d'absence de contrefaçon. L'usage de l'Application se fait à vos risques et périls.</p>
+
+  <h2>10. Limitation de responsabilité</h2>
+  <p>Dans les limites autorisées par la loi applicable, l'auteur du logiciel et l'Opérateur ne pourront être tenus responsables des dommages résultant de l'utilisation ou de l'impossibilité d'utiliser l'Application, notamment en cas d'interruption du service, de perte de données ou d'indisponibilité de contenus fournis par des tiers.</p>
+
+  <h2>11. Modification des CGU</h2>
+  <p>Les présentes CGU peuvent être mises à jour à tout moment. La date de dernière mise à jour figure en tête de document.</p>
+  <p>L'usage continu de l'Application après modification vaut acceptation des nouvelles conditions.</p>
+
+  <h2>12. Droit applicable</h2>
+  <p>Les présentes CGU sont régies par le <strong>droit français</strong>.</p>
+  <p>Tout litige relève de la compétence des tribunaux compétents, sous réserve des dispositions légales impératives applicables aux consommateurs.</p>
+
+  {% else %}
+  <p class="legal-updated">Last updated: 22/09/2026</p>
+
+  <h2>1. Purpose and acceptance</h2>
+  <p>These Terms of Service ("Terms") govern the use of the Tunoova application, a media player that allows:</p>
+  <ul>
+    <li>listening to live radio stations;</li>
+    <li>listening to podcasts;</li>
+    <li>playing personal audio files (MP3, etc.) provided by the user;</li>
+    <li>playing tracks available online.</li>
+  </ul>
+  <p>By accessing or using this instance of the Application, you acknowledge that you have read, understood, and accepted these Terms. If you do not accept these Terms, do not use the Application.</p>
+
+  <h2>2. Strictly personal and family use</h2>
+  <p>The Application is intended for <strong>strictly personal and family use</strong>.</p>
+  <p>By using it, you agree to:</p>
+  <ul>
+    <li>use it only in a private setting, for your own needs or those of your household;</li>
+    <li><strong>make no commercial, professional, or for-profit use</strong>, whether direct or indirect (for example: a paid service, advertising monetization, public broadcast, resale, or providing access for payment);</li>
+    <li>not make the instance available to the public or to an indeterminate number of users.</li>
+  </ul>
+  <p>Any commercial use of this instance is prohibited unless expressly authorized by its Operator.</p>
+  <p>This restriction concerns <strong>the use of this instance</strong>. The Tunoova software's source code is distributed separately under the <strong>PolyForm Noncommercial 1.0.0</strong> license. Rights to use, modify, and redistribute the source code are defined exclusively by that license.</p>
+
+  <h2>3. Self-hosted nature of the service</h2>
+  <p>The Application is <strong>self-hosted</strong> software. Each instance is installed and operated independently by an operator, who may be you or a third party.</p>
+  <ul>
+    <li>The software's author is limited to <strong>distributing the source code</strong>; they operate no central service, collect no data remotely, and have no control over individual instances.</li>
+    <li>The Operator of this instance is responsible for making it available, configuring it, securing it, and ensuring its compliance.</li>
+    <li>Any complaint relating to this instance must be addressed to the Operator.</li>
+  </ul>
+
+  <h2>4. Software license</h2>
+  <p>The Application's source code is published under the <strong>PolyForm Noncommercial 1.0.0</strong> license and is available on GitHub.</p>
+  <p>Rights to use, modify, and redistribute the source code are defined exclusively by that license.</p>
+  <p>These Terms additionally cover <strong>the use of this instance</strong> of the service.</p>
+
+  <h2>5. User content</h2>
+  <p>You may import and play your own audio files via the Application.</p>
+  <ul>
+    <li>You retain full ownership of your files.</li>
+    <li>You represent that you hold the rights necessary to store and listen to them via the Application.</li>
+    <li>The Operator claims no rights over your files and uses them only to allow you to play them.</li>
+  </ul>
+
+  <h2>6. Third-party content and services</h2>
+  <p>The Application allows access to content provided by third parties: radio streams, podcast hosts, and YouTube / YouTube Music.</p>
+  <p>This content is <strong>neither owned, hosted, nor controlled</strong> by the Application or its author.</p>
+  <p>You agree to:</p>
+  <ul>
+    <li>comply with the terms of use specific to each third-party service;</li>
+    <li>respect copyright and related rights applicable to the works you listen to;</li>
+    <li>use the Application only for lawful purposes.</li>
+  </ul>
+  <p><strong>Access to third-party content, particularly via YouTube, may, depending on usage, violate those services' terms of use or applicable law. You are responsible for the legality of your use.</strong></p>
+  <p>To the extent permitted by applicable law, the author and the Operator shall not be held liable for the content, services, or terms of use imposed by third-party services.</p>
+
+  <h2>7. Acceptable use</h2>
+  <p>You agree not to:</p>
+  <ul>
+    <li>use the Application for illegal, fraudulent, or commercial purposes (see Section 2);</li>
+    <li>attempt to circumvent the instance's security measures;</li>
+    <li>interfere with the operation of the instance or of third-party services (for example, through abusive automated requests);</li>
+    <li>use the Application to infringe third parties' intellectual property rights.</li>
+  </ul>
+
+  <h2>8. Availability and Operator responsibility</h2>
+  <p>The Application is provided "as is."</p>
+  <p>The Operator does not guarantee continuous availability and may suspend, modify, or discontinue the instance at any time, without notice.</p>
+  <p>The Operator is responsible for the operation, configuration, security, and availability of the instance it operates.</p>
+
+  <h2>9. Disclaimer of warranties</h2>
+  <p>In accordance with the PolyForm Noncommercial 1.0.0 license, <strong>the software is provided "AS IS," without warranty of any kind</strong>, express or implied, including without limitation the warranties of merchantability, fitness for a particular purpose, and noninfringement. Use of the Application is at your own risk.</p>
+
+  <h2>10. Limitation of liability</h2>
+  <p>To the extent permitted by applicable law, the software's author and the Operator shall not be liable for damages resulting from the use or inability to use the Application, including in the event of service interruption, data loss, or unavailability of content provided by third parties.</p>
+
+  <h2>11. Changes to these Terms</h2>
+  <p>These Terms may be updated at any time. The date of the last update appears at the top of this document.</p>
+  <p>Continued use of the Application after a change constitutes acceptance of the new Terms.</p>
+
+  <h2>12. Governing law</h2>
+  <p>These Terms are governed by <strong>French law</strong>.</p>
+  <p>Any dispute falls under the jurisdiction of the competent courts, subject to any mandatory legal provisions applicable to consumers.</p>
+  {% endif %}
+
+  <div class="legal-page-signin-link">
+    <a class="btn-primary" href="{{ url_for('auth.signin') }}">{{ t('legal_back_to_signin') }}</a>
+  </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,545 @@
+{% extends "admin/layout.html" %}
+{% block title %}{{ t('admin_dashboard_title') }}{% endblock %}
+{% block content_class %}admin-content-wide{% endblock %}
+{% block content %}
+<h1>{{ t('admin_dashboard_title') }}</h1>
+
+<div class="admin-tiles">
+  <a href="{{ url_for('admin.users') }}" class="admin-tile admin-tile-purple">
+    {{ icon('user', 'admin-tile-icon') }}
+    <div class="admin-tile-body">
+      <span class="admin-tile-value">{{ active_users_count }}</span>
+      <span class="admin-tile-label">{{ t('admin_tile_active_users') }}</span>
+      <span class="admin-tile-sub">{{ t('admin_tile_users_total', count=total_users_count) }}</span>
+    </div>
+  </a>
+
+  <a href="{{ url_for('admin.db_tables') }}" class="admin-tile admin-tile-blue">
+    {{ icon('database', 'admin-tile-icon') }}
+    <div class="admin-tile-body">
+      <span class="admin-tile-value">{{ db_size }}</span>
+      <span class="admin-tile-label">{{ t('admin_tile_database') }}</span>
+      <span class="admin-tile-sub">{{ t('admin_tile_tables', count=table_count) }}</span>
+    </div>
+  </a>
+
+  <a href="{{ url_for('admin.backups') }}" class="admin-tile admin-tile-indigo">
+    {{ icon('archive', 'admin-tile-icon') }}
+    <div class="admin-tile-body">
+      <span class="admin-tile-value">{{ backup_count }}</span>
+      <span class="admin-tile-label">{{ t('admin_tile_backups') }}</span>
+      <span class="admin-tile-sub">
+        {{ t('admin_tile_last_backup', date=(last_backup_at.strftime('%d/%m/%Y %H:%M') if last_backup_at else t('admin_tile_no_backup'))) }}<br>
+        {{ t('admin_tile_retention', days=backup_retention_days) }}
+      </span>
+    </div>
+  </a>
+
+  <a href="{{ url_for('admin.jobs') }}" class="admin-tile admin-tile-slate">
+    {{ icon('clock', 'admin-tile-icon') }}
+    <div class="admin-tile-body">
+      <span class="admin-tile-value">{{ enabled_job_count }}</span>
+      <span class="admin-tile-label">{{ t('admin_tile_jobs') }}</span>
+      <span class="admin-tile-sub">
+        {{ t('admin_tile_jobs_total', count=job_count) }}<br>
+        {% if next_job %}
+          {{ t('admin_tile_next_job', label=next_job.label, date=next_job.next_run.strftime('%d/%m/%Y %H:%M')) }}
+        {% else %}
+          {{ t('admin_tile_no_next_job') }}
+        {% endif %}
+      </span>
+    </div>
+  </a>
+
+  <a href="{{ url_for('admin.remote_access_page') }}" class="admin-tile admin-tile-teal">
+    {{ icon('globe', 'admin-tile-icon') }}
+    <div class="admin-tile-body">
+      <span class="admin-tile-value admin-tile-value-text">{{ t('admin_remote_mode_' ~ remote_mode) }}</span>
+      <span class="admin-tile-label">{{ t('admin_tile_network') }}</span>
+      <span class="admin-tile-sub admin-tile-sub-url">{{ remote_url or t('admin_tile_network_local') }}</span>
+    </div>
+  </a>
+
+  <a href="{{ url_for('admin.mp3_browser') }}" class="admin-tile admin-tile-orange">
+    {{ icon('music', 'admin-tile-icon') }}
+    <div class="admin-tile-body">
+      <span class="admin-tile-value">{{ mp3_count }}</span>
+      <span class="admin-tile-label">{{ t('admin_tile_mp3') }}</span>
+      <span class="admin-tile-sub">{{ t('admin_tile_mp3_sub', artists=artist_count, songs=song_count) }}</span>
+    </div>
+  </a>
+
+  <a href="{{ url_for('admin.db_table_rows', table_name='Podcast') }}" class="admin-tile admin-tile-green">
+    {{ icon('headphones', 'admin-tile-icon') }}
+    <div class="admin-tile-body">
+      <span class="admin-tile-value">{{ podcast_count }}</span>
+      <span class="admin-tile-label">{{ t('admin_tile_podcasts') }}</span>
+    </div>
+  </a>
+
+  <a href="{{ url_for('admin.radio_plugins') }}" class="admin-tile admin-tile-pink">
+    {{ icon('cast', 'admin-tile-icon') }}
+    <div class="admin-tile-body">
+      <span class="admin-tile-value">{{ radio_count }}</span>
+      <span class="admin-tile-label">{{ t('admin_tile_radios') }}</span>
+    </div>
+  </a>
+</div>
+
+<div class="admin-settings-buttons">
+  <button type="button" class="btn-primary" onclick="document.getElementById('smtp-modal').showModal()">
+    {{ icon('message-square') }} {{ t('admin_btn_smtp') }}
+  </button>
+  <button type="button" class="btn-primary" onclick="document.getElementById('backup-modal').showModal()">
+    {{ icon('database') }} {{ t('admin_btn_backup') }}
+  </button>
+  <button type="button" class="btn-primary" onclick="document.getElementById('mp3-modal').showModal()">
+    {{ icon('music') }} {{ t('admin_btn_mp3') }}
+  </button>
+  <button type="button" class="btn-primary" onclick="document.getElementById('purge-logs-modal').showModal()">
+    {{ icon('trash-2') }} {{ t('admin_btn_purge_logs') }}
+  </button>
+  <button type="button" class="btn-primary admin-about-btn" onclick="document.getElementById('about-modal').showModal()">
+    {{ icon('info') }} {{ t('settings_about') }}
+  </button>
+</div>
+
+<div class="admin-settings-buttons">
+  <button type="button" class="btn-primary admin-account-btn" onclick="document.getElementById('admin-account-modal').showModal()">
+    {{ icon('user') }} {{ t('admin_btn_account') }}
+  </button>
+</div>
+
+{# Bouton Update : visible seulement sur une installation faite par
+   install.sh (cf. app/update_service.py, /admin/update/check). #}
+<div class="admin-update-bar" id="admin-update-bar" hidden>
+  {{ icon('refresh-cw') }}
+  <span id="admin-update-text" class="admin-update-text">{{ t('admin_update_checking') }}</span>
+  <button type="button" class="btn-secondary" id="admin-update-check">{{ t('admin_update_check') }}</button>
+  <button type="button" class="btn-primary" id="admin-update-run" hidden>{{ t('admin_update_run') }}</button>
+</div>
+
+<dialog id="update-modal" class="app-modal admin-settings-modal">
+  <div class="app-modal-header">
+    <h2>{{ t('admin_update_title') }}</h2>
+  </div>
+  <div class="app-modal-body">
+    <p id="update-modal-state">{{ t('admin_update_confirm') }}</p>
+    <pre id="update-modal-log" class="admin-update-log" hidden></pre>
+    <div class="modal-actions" id="update-modal-confirm-actions">
+      <button type="button" class="btn-secondary" onclick="this.closest('dialog').close()">{{ t('common_cancel') }}</button>
+      <button type="button" class="btn-primary" id="update-modal-start">{{ t('admin_update_run') }}</button>
+    </div>
+    <div class="modal-actions" id="update-modal-done-actions" hidden>
+      <button type="button" class="btn-dark" id="update-modal-close" disabled>{{ t('common_ok') }}</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="purge-logs-modal" class="app-modal admin-settings-modal">
+  <div class="app-modal-header">
+    <h2>{{ t('admin_purge_logs_title') }}</h2>
+    <button type="button" class="app-modal-close" onclick="this.closest('dialog').close()" aria-label="{{ t('common_back') }}">{{ icon('x') }}</button>
+  </div>
+  <div class="app-modal-body">
+    <form method="post" action="{{ url_for('admin.purge_logs') }}" class="admin-settings-form" id="purge-logs-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <p class="admin-field-hint">{{ t('admin_purge_logs_intro') }}</p>
+      <label class="admin-checkbox-label"><input type="checkbox" name="tables" value="Log" checked> {{ t('admin_purge_logs_table_log', count=log_count) }}</label>
+      <label class="admin-checkbox-label"><input type="checkbox" name="tables" value="LoginHistory" checked> {{ t('admin_purge_logs_table_login', count=login_history_count) }}</label>
+      <label class="admin-checkbox-label"><input type="radio" name="scope" value="old" checked> {{ t('admin_purge_logs_scope_old') }}</label>
+      <label class="admin-checkbox-label"><input type="radio" name="scope" value="all"> {{ t('admin_purge_logs_scope_all') }}</label>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" onclick="this.closest('dialog').close()">{{ t('common_cancel') }}</button>
+        <button type="submit" class="btn-primary btn-danger">{{ t('admin_purge_logs_submit') }}</button>
+      </div>
+    </form>
+  </div>
+</dialog>
+
+<dialog id="admin-account-modal" class="app-modal admin-settings-modal">
+  <div class="app-modal-header">
+    <h2>{{ t('admin_account_title') }}</h2>
+    <button type="button" class="app-modal-close" onclick="this.closest('dialog').close()" aria-label="{{ t('common_back') }}">{{ icon('x') }}</button>
+  </div>
+  <div class="app-modal-body">
+    <form method="post" action="{{ url_for('admin.update_admin_account') }}" class="admin-settings-form" id="admin-account-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>
+        {{ t('admin_account_field') }}
+        <input type="email" name="ADMIN_EMAIL" value="{{ admin_email }}" required>
+      </label>
+      <label>
+        {{ t('admin_current_password') }}
+        <input type="password" name="current_password" id="admin-current-password" required>
+      </label>
+      <label>
+        {{ t('admin_new_password') }}
+        <input type="password" name="new_password" id="admin-new-password">
+        <span class="admin-field-hint" id="admin-password-hint">{{ t('admin_password_hint') }}</span>
+      </label>
+      <label>
+        {{ t('admin_confirm_password') }}
+        <input type="password" name="confirm_password" id="admin-confirm-password">
+        <span class="admin-field-hint" id="admin-confirm-hint"></span>
+      </label>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" onclick="this.closest('dialog').close()">{{ t('common_cancel') }}</button>
+        <button type="submit" class="btn-primary" id="admin-account-save-btn">{{ t('common_save') }}</button>
+      </div>
+    </form>
+  </div>
+</dialog>
+
+<dialog id="settings-result-modal" class="app-modal">
+  <div class="app-modal-header">
+    <h2 id="settings-result-title"></h2>
+    <button type="button" class="app-modal-close" id="settings-result-close" aria-label="{{ t('common_back') }}">{{ icon('x') }}</button>
+  </div>
+  <div class="app-modal-body">
+    <p id="settings-result-message"></p>
+    <div class="modal-actions">
+      <button type="button" class="btn-primary" id="settings-result-ok">{{ t('common_ok') }}</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="smtp-modal" class="app-modal admin-settings-modal">
+  <div class="app-modal-header">
+    <h2>{{ t('admin_smtp_title') }}</h2>
+    <button type="button" class="app-modal-close" onclick="this.closest('dialog').close()" aria-label="{{ t('common_back') }}">{{ icon('x') }}</button>
+  </div>
+  <div class="app-modal-body">
+    <form method="post" action="{{ url_for('admin.update_smtp_settings') }}" class="admin-settings-form" id="smtp-settings-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>
+        {{ t('admin_smtp_host') }}
+        <input type="text" name="SMTP_HOST" value="{{ smtp_host }}" placeholder="smtp.example.com">
+      </label>
+      <label>
+        {{ t('admin_smtp_port') }}
+        <input type="text" name="SMTP_PORT" value="{{ smtp_port }}" placeholder="587">
+      </label>
+      <label>
+        {{ t('admin_smtp_user') }}
+        <input type="text" name="SMTP_USER" value="{{ smtp_user }}">
+      </label>
+      <label>
+        {{ t('admin_smtp_password') }}
+        <input type="password" name="SMTP_PASSWORD" placeholder="{{ t('admin_smtp_password_placeholder_set') if smtp_password_set else t('admin_smtp_password_placeholder_unset') }}">
+      </label>
+      <label>
+        {{ t('admin_smtp_from') }}
+        <input type="email" name="SMTP_FROM" value="{{ smtp_from }}" placeholder="tunoova@example.com">
+      </label>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" onclick="this.closest('dialog').close()">{{ t('common_cancel') }}</button>
+        <button type="submit" class="btn-primary">{{ t('common_save') }}</button>
+      </div>
+    </form>
+  </div>
+</dialog>
+
+<dialog id="backup-modal" class="app-modal admin-settings-modal">
+  <div class="app-modal-header">
+    <h2>{{ t('admin_backup_title') }}</h2>
+    <button type="button" class="app-modal-close" onclick="this.closest('dialog').close()" aria-label="{{ t('common_back') }}">{{ icon('x') }}</button>
+  </div>
+  <div class="app-modal-body">
+    <form method="post" action="{{ url_for('admin.update_backup_settings') }}" class="admin-settings-form" id="backup-settings-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>
+        {{ t('admin_backup_path') }}
+        <input type="text" name="BACKUP_PATH" value="{{ backup_path }}" required>
+      </label>
+      <label>
+        {{ t('admin_backup_retention') }}
+        <input type="number" name="BACKUP_RETENTION_DAYS" value="{{ backup_retention_days }}" min="1" step="1" required>
+      </label>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" onclick="this.closest('dialog').close()">{{ t('common_cancel') }}</button>
+        <button type="submit" class="btn-primary">{{ t('common_save') }}</button>
+      </div>
+    </form>
+  </div>
+</dialog>
+
+<dialog id="mp3-modal" class="app-modal admin-settings-modal">
+  <div class="app-modal-header">
+    <h2>{{ t('admin_mp3_title') }}</h2>
+    <button type="button" class="app-modal-close" onclick="this.closest('dialog').close()" aria-label="{{ t('common_back') }}">{{ icon('x') }}</button>
+  </div>
+  <div class="app-modal-body">
+    <form method="post" action="{{ url_for('admin.update_mp3_settings') }}" class="admin-settings-form" id="mp3-settings-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>
+        {{ t('admin_mp3_path') }}
+        <input type="text" name="MP3_LIBRARY_PATH" value="{{ mp3_library_path }}" required>
+      </label>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" onclick="this.closest('dialog').close()">{{ t('common_cancel') }}</button>
+        <button type="submit" class="btn-primary">{{ t('common_save') }}</button>
+      </div>
+    </form>
+  </div>
+</dialog>
+
+<dialog id="about-modal" class="app-modal">
+  <div class="app-modal-header">
+    <h2>{{ t('settings_about') }}</h2>
+    <button type="button" class="app-modal-close" onclick="this.closest('dialog').close()" aria-label="{{ t('common_back') }}">{{ icon('x') }}</button>
+  </div>
+  <div class="app-modal-body">
+    <div class="about-identity">
+      <img class="about-logo" src="{{ url_for('static', filename='brand/header-mascot.png') }}" alt="">
+      <span class="about-app-name">{{ t('app_name') }}</span>
+    </div>
+    <ul class="about-info-list">
+      <li>{{ icon('info') }}<span>{{ t('settings_about_version', version=app_version) }}</span></li>
+      <li>{{ icon('calendar') }}<span>{{ t('settings_about_release_date', date=app_release_date) }}</span></li>
+      <li>{{ icon('user') }}<span>{{ t('settings_about_author', author=app_author) }}</span></li>
+      <li>{{ icon('external-link') }}<span>{{ t('settings_about_open_source') }} <a href="{{ app_repo_url }}" target="_blank" rel="noopener">GitHub</a>.</span></li>
+    </ul>
+    <div class="modal-actions">
+      <button type="button" class="btn-dark" onclick="this.closest('dialog').close()">{{ t('common_ok') }}</button>
+    </div>
+  </div>
+</dialog>
+
+<script>
+(function () {
+  var i18n = {
+    success: {{ t('common_success_title')|tojson }},
+    error: {{ t('common_error_title')|tojson }},
+    sessionExpiredMsg: {{ t('admin_session_expired_msg')|tojson }},
+    unexpectedErrorMsg: {{ t('admin_unexpected_error_msg')|tojson }},
+    passwordMismatch: {{ t('admin_password_mismatch')|tojson }},
+  };
+
+  var resultModal = document.getElementById('settings-result-modal');
+  var resultTitle = document.getElementById('settings-result-title');
+  var resultMessage = document.getElementById('settings-result-message');
+  var reloadOnResultClose = false;
+
+  function dismissResultModal() {
+    resultModal.close();
+    if (reloadOnResultClose) {
+      window.location.reload();
+    }
+  }
+  document.getElementById('settings-result-ok').addEventListener('click', dismissResultModal);
+  document.getElementById('settings-result-close').addEventListener('click', dismissResultModal);
+
+  function showResult(ok, message, reload) {
+    resultTitle.textContent = ok ? i18n.success : i18n.error;
+    resultMessage.textContent = message;
+    resultTitle.classList.toggle('text-error', !ok);
+    reloadOnResultClose = Boolean(reload);
+    resultModal.showModal();
+  }
+
+  // Soumission AJAX generique pour un formulaire de reglage admin : affiche
+  // le resultat (succes/erreur) dans la fenetre commune ci-dessus au lieu
+  // d'un rechargement complet de page. Si le serveur repond autre chose que
+  // du JSON (page de login, erreur CSRF...), la session/le jeton de la page
+  // a expire (le jeton CSRF est valable 1h) - le changement a pu malgre tout
+  // etre applique cote serveur avant la coupure.
+  function wireAjaxSettingsForm(form, onSuccess) {
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        credentials: 'same-origin',
+      })
+        .then(function (r) {
+          var contentType = r.headers.get('content-type') || '';
+          if (!contentType.includes('application/json')) {
+            var err = new Error('session-expired');
+            err.sessionExpired = true;
+            throw err;
+          }
+          return r.json();
+        })
+        .then(function (res) {
+          showResult(res.ok, res.message, false);
+          if (res.ok) {
+            form.closest('dialog').close();
+            if (onSuccess) onSuccess();
+          }
+        })
+        .catch(function (err) {
+          if (err && err.sessionExpired) {
+            showResult(false, i18n.sessionExpiredMsg, true);
+          } else {
+            showResult(false, i18n.unexpectedErrorMsg, false);
+          }
+        });
+    });
+  }
+
+  // --- Compte admin : validation en direct + soumission AJAX ---
+  var newPw = document.getElementById('admin-new-password');
+  var confirmPw = document.getElementById('admin-confirm-password');
+  var currentPw = document.getElementById('admin-current-password');
+  var saveBtn = document.getElementById('admin-account-save-btn');
+  var pwHint = document.getElementById('admin-password-hint');
+  var confirmHint = document.getElementById('admin-confirm-hint');
+  var accountForm = document.getElementById('admin-account-form');
+
+  function isStrongPassword(pw) {
+    return pw.length >= 12 && /[A-Z]/.test(pw) && /[a-z]/.test(pw) && /[0-9]/.test(pw) && /[^A-Za-z0-9]/.test(pw);
+  }
+
+  function validate() {
+    var pw = newPw.value;
+    var confirm = confirmPw.value;
+
+    // Le nouveau mot de passe est obligatoire pour activer Enregistrer : pas
+    // de changement "email seul" silencieux depuis ce formulaire.
+    var strong = pw !== '' && isStrongPassword(pw);
+    pwHint.classList.toggle('admin-field-hint-error', pw !== '' && !strong);
+
+    var match = pw !== '' && pw === confirm;
+    confirmHint.textContent = (confirm !== '' && !match) ? i18n.passwordMismatch : '';
+    confirmHint.classList.toggle('admin-field-hint-error', confirm !== '' && !match);
+
+    var ok = Boolean(currentPw.value) && strong && match;
+    saveBtn.disabled = !ok;
+  }
+
+  [newPw, confirmPw, currentPw].forEach(function (el) {
+    el.addEventListener('input', validate);
+  });
+  validate();
+
+  wireAjaxSettingsForm(accountForm, function () {
+    accountForm.reset();
+    validate();
+  });
+
+  // --- SMTP, Chemin MP3 et Backup DB : soumission AJAX (verif existence/
+  // creation du dossier et retention cote serveur, cf. update_smtp_settings /
+  // update_mp3_settings / update_backup_settings) ---
+  wireAjaxSettingsForm(document.getElementById('smtp-settings-form'));
+  wireAjaxSettingsForm(document.getElementById('mp3-settings-form'));
+  wireAjaxSettingsForm(document.getElementById('backup-settings-form'));
+  // Purge des logs : recharge a la fermeture du resultat pour actualiser les compteurs.
+  wireAjaxSettingsForm(document.getElementById('purge-logs-form'), function () { reloadOnResultClose = true; });
+})();
+
+// --- Bouton Update (cf. app/admin/update.py) ---
+(function () {
+  var i18n = {
+    upToDate: {{ t('admin_update_up_to_date')|tojson }},
+    available: {{ t('admin_update_available')|tojson }},
+    checkFailed: {{ t('admin_update_check_failed')|tojson }},
+    requested: {{ t('admin_update_state_requested')|tojson }},
+    running: {{ t('admin_update_state_running')|tojson }},
+    restarting: {{ t('admin_update_state_restarting')|tojson }},
+    success: {{ t('admin_update_state_success')|tojson }},
+    failed: {{ t('admin_update_state_failed')|tojson }},
+  };
+  var csrfToken = {{ csrf_token()|tojson }};
+  var bar = document.getElementById('admin-update-bar');
+  var text = document.getElementById('admin-update-text');
+  var checkBtn = document.getElementById('admin-update-check');
+  var runBtn = document.getElementById('admin-update-run');
+  var modal = document.getElementById('update-modal');
+  var modalState = document.getElementById('update-modal-state');
+  var modalLog = document.getElementById('update-modal-log');
+  var modalClose = document.getElementById('update-modal-close');
+  var modalStart = document.getElementById('update-modal-start');
+  var confirmActions = document.getElementById('update-modal-confirm-actions');
+  var doneActions = document.getElementById('update-modal-done-actions');
+  var started = false;
+
+  function format(template, values) {
+    return template.replace(/\{(\w+)\}/g, function (m, key) { return values[key] != null ? values[key] : m; });
+  }
+
+  function check(force) {
+    checkBtn.disabled = true;
+    fetch('{{ url_for("admin.update_check") }}' + (force ? '?force=1' : ''), { credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        if (!res.supported) return;
+        bar.hidden = false;
+        if (res.error) {
+          text.textContent = format(i18n.checkFailed, res);
+          runBtn.hidden = true;
+        } else if (res.available) {
+          text.textContent = format(i18n.available, res);
+          runBtn.hidden = false;
+        } else {
+          text.textContent = format(i18n.upToDate, res);
+          runBtn.hidden = true;
+        }
+      })
+      .catch(function () {})
+      .finally(function () { checkBtn.disabled = false; });
+  }
+
+  // Suit la mise a jour jusqu'au bout : le service Tunoova est arrete pendant
+  // l'update, les appels echouent alors (= redemarrage en cours) jusqu'a ce
+  // que la nouvelle version reponde.
+  function poll(seenRunning) {
+    fetch('{{ url_for("admin.update_status") }}', { credentials: 'same-origin', cache: 'no-store' })
+      .then(function (r) {
+        if (!r.ok || !(r.headers.get('content-type') || '').includes('application/json')) throw new Error('down');
+        return r.json();
+      })
+      .then(function (res) {
+        modalLog.textContent = res.log || '';
+        modalLog.scrollTop = modalLog.scrollHeight;
+        if (res.state === 'running') seenRunning = true;
+        if (seenRunning && (res.state === 'success' || res.state === 'failed')) {
+          modalState.textContent = res.state === 'success' ? i18n.success : i18n.failed;
+          modalState.classList.toggle('text-error', res.state === 'failed');
+          modalClose.disabled = false;
+          return;
+        }
+        modalState.textContent = res.state === 'running' ? i18n.running : i18n.requested;
+        setTimeout(function () { poll(seenRunning); }, 2000);
+      })
+      .catch(function () {
+        modalState.textContent = i18n.restarting;
+        setTimeout(function () { poll(true); }, 3000);
+      });
+  }
+
+  checkBtn.addEventListener('click', function () { check(true); });
+  runBtn.addEventListener('click', function () { modal.showModal(); });
+  modalStart.addEventListener('click', function () {
+    modalStart.disabled = true;
+    var body = new FormData();
+    body.append('csrf_token', csrfToken);
+    fetch('{{ url_for("admin.update_run") }}', {
+      method: 'POST', body: body, credentials: 'same-origin',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        if (!res.ok) {
+          modalState.textContent = res.message;
+          modalState.classList.add('text-error');
+          return;
+        }
+        started = true;
+        confirmActions.hidden = true;
+        doneActions.hidden = false;
+        modalLog.hidden = false;
+        modalState.textContent = i18n.requested;
+        poll(false);
+      })
+      .finally(function () { modalStart.disabled = false; });
+  });
+  // Pas de fermeture par Echap pendant la mise a jour.
+  modal.addEventListener('cancel', function (e) { if (started && modalClose.disabled) e.preventDefault(); });
+  modalClose.addEventListener('click', function () { window.location.reload(); });
+
+  check(false);
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% import "podcast/_macros.html" as m %}
+{% block title %}{{ subscription.PodcastName }}{% endblock %}
+{% block header_title %}{{ subscription.PodcastName }}{% endblock %}
+{% block content %}
+<div class="library-screen podcast-screen">
+  {{ m.episode_block(subscription, episodes, has_more, page_size) }}
+</div>
+{% endblock %}

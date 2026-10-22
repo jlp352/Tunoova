@@ -1,0 +1,138 @@
+{% extends "admin/layout.html" %}
+{% block title %}{{ table_name }} — {{ t('admin_db_title') }}{% endblock %}
+{% block content_class %}admin-content-wide{% endblock %}
+{% block content %}
+<p><a href="{{ url_for('admin.db_tables') }}" class="btn-link">&larr; {{ t('admin_db_col_table') }}</a></p>
+<h1>{{ table_name }}</h1>
+<p><a href="{{ url_for('admin.db_row_new', table_name=table_name) }}" class="btn-primary">{{ t('admin_add_row') }}</a></p>
+
+<form method="get" class="admin-filter-form">
+  <input type="hidden" name="page" value="1">
+
+  <label>
+    {{ t('admin_filter_field') }}
+    <select name="filter_field" onchange="this.form.submit()">
+      <option value="">{{ t('admin_filter_no_filter') }}</option>
+      {% for name in filterable_columns %}
+        <option value="{{ name }}" {{ "selected" if name == filter_field else "" }}>{{ name }}</option>
+      {% endfor %}
+    </select>
+  </label>
+
+  <label>
+    {{ t('admin_filter_operator') }}
+    <select name="filter_op" onchange="this.form.submit()">
+      {% for value, label in filter_ops %}
+        <option value="{{ value }}" {{ "selected" if value == filter_op else "" }}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </label>
+
+  <label>
+    {{ t('admin_filter_value') }}
+    {% if filter_field_type == "boolean" %}
+      <select name="filter_value">
+        <option value="" {{ "selected" if filter_value == "" else "" }}>—</option>
+        <option value="on" {{ "selected" if filter_value == "on" else "" }}>{{ t('common_yes') }}</option>
+        <option value="off" {{ "selected" if filter_value == "off" else "" }}>{{ t('common_no') }}</option>
+      </select>
+    {% elif filter_field_type == "datetime" %}
+      <input type="datetime-local" name="filter_value" value="{{ filter_value }}">
+    {% elif filter_field_type == "date" %}
+      <input type="date" name="filter_value" value="{{ filter_value }}">
+    {% else %}
+      <input type="text" name="filter_value" value="{{ filter_value }}">
+    {% endif %}
+  </label>
+
+  {% if filter_op == "between" %}
+    <label>
+      {{ t('admin_filter_and') }}
+      {% if filter_field_type == "datetime" %}
+        <input type="datetime-local" name="filter_value2" value="{{ filter_value2 }}">
+      {% elif filter_field_type == "date" %}
+        <input type="date" name="filter_value2" value="{{ filter_value2 }}">
+      {% else %}
+        <input type="text" name="filter_value2" value="{{ filter_value2 }}">
+      {% endif %}
+    </label>
+  {% endif %}
+
+  <input type="hidden" name="sort_field" value="{{ sort_field }}">
+  <input type="hidden" name="sort_dir" value="{{ sort_dir }}">
+
+  <button type="submit" class="btn-primary">{{ t('admin_apply') }}</button>
+  <a href="{{ url_for('admin.db_table_rows', table_name=table_name) }}" class="btn-secondary">{{ t('admin_reset_filters') }}</a>
+</form>
+
+{% if filter_error %}
+  <p class="text-error">{{ filter_error }}</p>
+{% endif %}
+
+<div class="admin-table-wrap admin-table-wrap-scroll">
+  <table class="admin-table">
+    <thead>
+      <tr>
+        {% for column in columns %}
+          <th>
+            {% if column.sensitive %}
+              {{ column.name }}
+            {% else %}
+              <a
+                class="admin-sort-link"
+                href="{{ url_for('admin.db_table_rows', table_name=table_name, page=1, sort_field=column.name, sort_dir=('desc' if sort_field == column.name and sort_dir == 'asc' else 'asc'), filter_field=filter_field, filter_op=filter_op, filter_value=filter_value, filter_value2=filter_value2) }}"
+              >
+                {{ column.name }}
+                {% if sort_field == column.name %}
+                  {{ icon('chevron-down', 'admin-sort-icon admin-sort-icon-active' ~ (' admin-sort-asc' if sort_dir == 'asc' else '')) }}
+                {% else %}
+                  {{ icon('arrow-up-down', 'admin-sort-icon') }}
+                {% endif %}
+              </a>
+            {% endif %}
+          </th>
+        {% endfor %}
+        <th>{{ t('admin_col_actions') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+        <tr>
+          {% for column in columns %}
+            <td>
+              {% if column.sensitive %}
+                &bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;
+              {% elif row[column.name] is sameas true or row[column.name] is sameas false %}
+                {{ t('common_yes') if row[column.name] else t('common_no') }}
+              {% else %}
+                {{ row[column.name] if row[column.name] is not none else "" }}
+              {% endif %}
+            </td>
+          {% endfor %}
+          <td class="admin-table-actions">
+            <a href="{{ url_for('admin.db_row_edit', table_name=table_name, pk_value=row[pk_name]) }}" class="btn-link">{{ t('common_edit') }}</a>
+            <form method="post" action="{{ url_for('admin.db_row_delete', table_name=table_name, pk_value=row[pk_name]) }}" data-confirm="{{ t('admin_delete_row_confirm') }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn-link btn-link-danger">{{ t('common_delete') }}</button>
+            </form>
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="{{ columns|length + 1 }}" class="empty-state">{{ t('admin_no_rows') }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if total_pages > 1 %}
+  <div class="admin-pagination">
+    {% for p in range(1, total_pages + 1) %}
+      {% if p == page %}
+        <strong>{{ p }}</strong>
+      {% else %}
+        <a href="{{ url_for('admin.db_table_rows', table_name=table_name, page=p, **active_query) }}">{{ p }}</a>
+      {% endif %}
+    {% endfor %}
+  </div>
+{% endif %}
+{% endblock %}

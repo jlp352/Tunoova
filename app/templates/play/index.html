@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% set play_screen = true %}
+{#
+  Repli SSR (lien direct/partage/rafraichissement/JS desactive) : plus aucun
+  contenu propre a ce template - #play-overlay (cf. base.html) est TOUJOURS
+  present et rendu hors de #app-boost-root avec le vrai `ctx` transmis par
+  play.show(), et s'affiche ici sans navigation JS (juste pas de `hidden`
+  puisque play_screen est vrai). Ceci evite tout doublon d'id avec
+  play/_screen_body.html, et garantit que #play-overlay existe encore pour
+  les ouvertures ulterieures depuis d'autres ecrans de la meme session (cf.
+  commentaire dans base.html).
+#}
+{% set show_header = false %}
+{% block title %}{{ ctx.title }}{% endblock %}

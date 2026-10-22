@@ -1,0 +1,64 @@
+# Resultats bandit/semgrep examines et juges sans risque (scripts/audit.sh).
+# Format : outil|regle|fichier|ligne de code. Regenerer avec --update-baseline.
+bandit|B104|run.py|app, host="0.0.0.0", port=args.port, threads=32, channel_timeout=900, ident="",
+bandit|B104|run.py|host="0.0.0.0",
+bandit|B106|app/auth/routes.py|return redirect(url_for("auth.signin", password_saved="1"))
+bandit|B110|app/libsoundtouch_patch.py|except Exception as e:
+bandit|B110|app/youtube_music_service.py|except Exception:
+bandit|B112|app/cast_service.py|except Exception:
+bandit|B404|app/media.py|import subprocess
+bandit|B404|app/tailscale_service.py|import subprocess
+bandit|B404|app/update_service.py|import subprocess
+bandit|B603|app/media.py|process = subprocess.Popen(command, stdout=subprocess.PIPE)
+bandit|B603|app/tailscale_service.py|result = subprocess.run(
+bandit|B603|app/tailscale_service.py|return subprocess.run([exe, "is-failed", "--quiet", "tailscaled"], timeout=5, check=False).returncode == 0
+bandit|B603|app/tailscale_service.py|self.proc = subprocess.Popen(
+bandit|B603|app/update_service.py|result = subprocess.run(
+bandit|B607|app/update_service.py|result = subprocess.run(
+bandit|B704|app/admin/remote_access.py|return Markup(segno.make(url, error="m").svg_inline(scale=4, border=2)) if url else None
+bandit|B704|app/icons.py|return Markup(svg)
+semgrep|avoid-sqlalchemy-text|db/seed.py|db.session.execute(text(f'DROP TABLE IF EXISTS "{table}"'))
+semgrep|avoid_app_run_with_bad_host|run.py|app.run(
+semgrep|flask-url-for-external-true|app/remote_access.py|return url_for(endpoint, _external=True, **values)
+semgrep|nan-injection|app/library/routes.py|fav = bool(request.args.get("fav"))
+semgrep|open-redirect|app/admin/routes.py|return redirect(safe_local_url(request.referrer, url_for("admin.dashboard")))
+semgrep|unquoted-attribute-var|app/templates/admin/db_row_form.html|<input type="checkbox" name="{{ field.name }}" {{ "checked" if field.value else "" }}>
+semgrep|unquoted-attribute-var|app/templates/admin/db_row_form.html|<input type="date" name="{{ field.name }}" value="{{ field.value or "" }}" {{ "required" if field.required else "" }}>
+semgrep|unquoted-attribute-var|app/templates/admin/db_row_form.html|<input type="datetime-local" name="{{ field.name }}" value="{{ field.value or "" }}" {{ "required" if field.required else "" }}>
+semgrep|unquoted-attribute-var|app/templates/admin/db_row_form.html|<input type="text" name="{{ field.name }}" value="{{ field.value if field.value is not none else "" }}" {{ "required" if field.required else "" }}>
+semgrep|unquoted-attribute-var|app/templates/admin/db_table_rows.html|<option value="" {{ "selected" if filter_value == "" else "" }}>—</option>
+semgrep|unquoted-attribute-var|app/templates/admin/db_table_rows.html|<option value="off" {{ "selected" if filter_value == "off" else "" }}>{{ t('common_no') }}</option>
+semgrep|unquoted-attribute-var|app/templates/admin/db_table_rows.html|<option value="on" {{ "selected" if filter_value == "on" else "" }}>{{ t('common_yes') }}</option>
+semgrep|unquoted-attribute-var|app/templates/admin/db_table_rows.html|<option value="{{ name }}" {{ "selected" if name == filter_field else "" }}>{{ name }}</option>
+semgrep|unquoted-attribute-var|app/templates/admin/db_table_rows.html|<option value="{{ value }}" {{ "selected" if value == filter_op else "" }}>{{ label }}</option>
+semgrep|unquoted-attribute-var|app/templates/admin/edit_user.html|<input type="checkbox" name="first_login" {{ "checked" if user.FirstLogin else "" }}>
+semgrep|unquoted-attribute-var|app/templates/admin/jobs.html|<button type="submit" class="btn-link job-run-btn" {{ "disabled" if job.running else "" }}>{{ t('admin_run_now') }}</button>
+semgrep|unquoted-attribute-var|app/templates/admin/jobs.html|<td><input type="checkbox" name="enabled" form="job-form-{{ job.id }}" {{ "checked" if job.enabled else "" }}></td>
+semgrep|unquoted-attribute-var|app/templates/admin/radio_plugins.html|<td><input type="checkbox" name="enabled" form="plugin-form-{{ p.RadioPlugInId }}" {{ "checked" if p.Enabled else "" }}></td>
+semgrep|unquoted-attribute-var|app/templates/admin/remote_access.html|<input type="radio" name="mode" value="{{ m }}" {{ 'checked' if selected == m }}>
+semgrep|unvalidated-password|app/admin/routes.py|user.set_password(new_password)
+semgrep|unvalidated-password|app/admin/routes.py|user.set_password(secrets.token_urlsafe(32))  # mot de passe temporaire inconnu de tous, remplace via le lien d'activation
+semgrep|unvalidated-password|app/auth/routes.py|user.set_password(password)
+semgrep|unvalidated-password|db/seed.py|user.set_password(secrets.token_urlsafe(32))
+semgrep|var-in-href|app/templates/admin/dashboard.html|<li>{{ icon('external-link') }}<span>{{ t('settings_about_open_source') }} <a href="{{ app_repo_url }}" target="_blank" rel="noopener">GitHub</a>.</span></li>
+semgrep|var-in-href|app/templates/admin/remote_access.html|<a class="btn-primary" href="{{ task.url }}" target="_blank" rel="noopener">{{ icon('external-link') }} {{ t('admin_remote_ts_authorize_open') }}</a>
+semgrep|var-in-href|app/templates/admin/remote_access.html|<a class="btn-primary" href="{{ ts.auth_url }}" target="_blank" rel="noopener">{{ icon('external-link') }} {{ t('admin_remote_ts_login_open') }}</a>
+semgrep|var-in-href|app/templates/admin/remote_access.html|<a href="{{ console_url }}" target="_blank" rel="noopener">{{ t('admin_remote_ts_authorize_nolink') }}</a>
+semgrep|var-in-href|app/templates/admin/remote_access.html|<a href="{{ public_url }}" target="_blank" rel="noopener" id="remote-url">{{ public_url }}</a>
+semgrep|var-in-href|app/templates/library/album.html|<a class="icon-btn back-btn" href="{{ back_url }}" aria-label="{{ t('common_back') }}">{{ icon('arrow-left') }}</a>
+semgrep|var-in-href|app/templates/library/artist.html|<a class="icon-btn back-btn" href="{{ back_url }}" aria-label="{{ t('common_back') }}">{{ icon('arrow-left') }}</a>
+semgrep|var-in-href|app/templates/library/top_tracks.html|<a class="icon-btn back-btn" href="{{ back_url }}" aria-label="{{ t('common_back') }}">{{ icon('arrow-left') }}</a>
+semgrep|var-in-href|app/templates/library/youtube_album.html|<a class="icon-btn back-btn" href="{{ back_url }}" aria-label="{{ t('common_back') }}">{{ icon('arrow-left') }}</a>
+semgrep|var-in-href|app/templates/library/youtube_artist.html|<a class="icon-btn back-btn" href="{{ back_url }}" aria-label="{{ t('common_back') }}">{{ icon('arrow-left') }}</a>
+semgrep|var-in-href|app/templates/notifications/index.html|<a href="{{ item.action_url }}" class="add-result-action">{{ t('notifications_view_album') }}</a>
+semgrep|var-in-href|app/templates/podcast/_macros.html|<a class="radio-play-btn" href="{{ detail_url }}">
+semgrep|var-in-href|app/templates/podcast/_macros.html|<a class="track-row-chevron" href="{{ detail_url }}" aria-label="{{ sub.PodcastName }}">{{ icon('chevron-right') }}</a>
+semgrep|var-in-href|app/templates/settings/index.html|<li>{{ icon('external-link') }}<span>{{ t('settings_about_open_source') }} <a href="{{ app_repo_url }}" target="_blank" rel="noopener">GitHub</a>.</span></li>
+semgrep|var-in-href|app/templates/userprofile/index.html|<a class="icon-btn back-btn" href="{{ next_url }}" aria-label="{{ t('common_back') }}">{{ icon('arrow-left') }}</a>
+semgrep|var-in-script-tag|app/templates/base.html|active: {{ t('cast_active_badge')|tojson }},
+semgrep|var-in-script-tag|app/templates/base.html|dlna: {{ t('cast_device_type_dlna')|tojson }},
+semgrep|var-in-script-tag|app/templates/base.html|offline: {{ t('cast_offline_badge')|tojson }},
+semgrep|var-in-script-tag|app/templates/base.html|soundtouch: {{ t('cast_device_type_soundtouch')|tojson }},
+semgrep|var-in-script-tag|app/templates/base.html|stop: {{ t('cast_stop_action')|tojson }}
+semgrep|var-in-script-tag|app/templates/library/top_tracks.html|tunoovaAutoplayOnce({{ autoplay_url|tojson }});
+semgrep|var-in-script-tag|app/templates/podcast/index.html|var target = document.getElementById('podcast-block-{{ scroll_to }}');

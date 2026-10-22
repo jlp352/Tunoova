@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}{{ t('radio_edit_title') }}{% endblock %}
+{% block header_title %}{{ t('radio_edit_title') }}{% endblock %}
+{% block content %}
+{% if error %}<p class="form-error">{{ error }}</p>{% endif %}
+<form method="post" class="auth-form">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <label for="name">{{ t('radio_field_name') }}</label>
+  <input type="text" id="name" name="name" value="{{ subscription.RadioName }}" required>
+
+  <label for="stream_url">{{ t('radio_field_url') }}</label>
+  <input type="url" id="stream_url" name="stream_url" value="{{ subscription.LinkURL }}" required>
+
+  <label for="image_url">{{ t('radio_field_image') }}</label>
+  <input type="url" id="image_url" name="image_url" value="{{ subscription.LinkImage or '' }}">
+
+  <button type="submit" class="btn-primary">{{ t('common_save') }}</button>
+</form>
+{% endblock %}

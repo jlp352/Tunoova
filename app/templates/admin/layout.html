@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="{{ current_locale() }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Admin - Tunoova{% endblock %}</title>
+  <link rel="icon" href="{{ url_for('static', filename='brand/favicon.ico') }}" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='brand/favicon-32.png') }}">
+  <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='brand/favicon-192.png') }}">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='brand/apple-touch-icon.png') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body class="admin-body">
+  <header class="admin-header">
+    <div class="admin-header-brand">
+      <img class="admin-header-logo" src="{{ url_for('static', filename='brand/header-mascot.png') }}" alt="">
+      <span class="admin-header-title">{{ t('admin_header_title') }}</span>
+    </div>
+    <div class="admin-header-actions">
+      <div class="admin-locale-switch">
+        <a href="{{ url_for('admin.set_locale', lang='fr') }}" class="{{ 'active' if current_locale() == 'fr' }}">FR</a>
+        <a href="{{ url_for('admin.set_locale', lang='en') }}" class="{{ 'active' if current_locale() == 'en' }}">EN</a>
+      </div>
+      <a href="{{ url_for('admin.logout') }}" class="admin-logout-link">{{ t('common_logout') }}</a>
+    </div>
+  </header>
+  <nav class="admin-tabs">
+    <a href="{{ url_for('admin.dashboard') }}" class="{{ 'active' if request.endpoint == 'admin.dashboard' }}">{{ t('admin_dashboard_title') }}</a>
+    <a href="{{ url_for('admin.users') }}" class="{{ 'active' if request.endpoint == 'admin.users' }}">{{ t('admin_users_title') }}</a>
+    <a href="{{ url_for('admin.db_tables') }}" class="{{ 'active' if request.endpoint in ('admin.db_tables', 'admin.db_table_rows', 'admin.db_row_new', 'admin.db_row_edit') }}">{{ t('admin_db_title') }}</a>
+    <a href="{{ url_for('admin.jobs') }}" class="{{ 'active' if request.endpoint == 'admin.jobs' }}">{{ t('admin_jobs_title') }}</a>
+    <a href="{{ url_for('admin.radio_plugins') }}" class="{{ 'active' if request.endpoint == 'admin.radio_plugins' }}">{{ t('admin_plugins_title') }}</a>
+    <a href="{{ url_for('admin.mp3_browser') }}" class="{{ 'active' if request.endpoint == 'admin.mp3_browser' }}">{{ t('admin_mp3_tab') }}</a>
+    <a href="{{ url_for('admin.backups') }}" class="{{ 'active' if request.endpoint == 'admin.backups' }}">{{ t('admin_backups_tab') }}</a>
+    <a href="{{ url_for('admin.remote_access_page') }}" class="{{ 'active' if request.endpoint == 'admin.remote_access_page' }}">{{ t('admin_remote_tab') }}</a>
+  </nav>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-container">
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <main class="admin-content {% block content_class %}{% endblock %}">
+    {% block content %}{% endblock %}
+  </main>
+
+  {# Confirmation des formulaires marques data-confirm="..." (a la place du
+     confirm() natif du navigateur). #}
+  <dialog id="admin-confirm-modal" class="app-modal admin-settings-modal">
+    <div class="app-modal-header">
+      <h2>{{ t('common_delete') }}</h2>
+      <button type="button" class="app-modal-close" onclick="this.closest('dialog').close()" aria-label="{{ t('common_back') }}">{{ icon('x') }}</button>
+    </div>
+    <div class="app-modal-body">
+      <p id="admin-confirm-text"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" onclick="this.closest('dialog').close()">{{ t('common_cancel') }}</button>
+        <button type="button" class="btn-primary btn-danger" id="admin-confirm-ok">{{ t('common_delete') }}</button>
+      </div>
+    </div>
+  </dialog>
+  <script>
+  (function () {
+    var modal = document.getElementById('admin-confirm-modal');
+    var pendingForm = null;
+    document.addEventListener('submit', function (e) {
+      var form = e.target;
+      if (!form.dataset || !form.dataset.confirm || form.dataset.confirmed) return;
+      e.preventDefault();
+      pendingForm = form;
+      document.getElementById('admin-confirm-text').textContent = form.dataset.confirm;
+      modal.showModal();
+    });
+    document.getElementById('admin-confirm-ok').addEventListener('click', function () {
+      modal.close();
+      if (!pendingForm) return;
+      pendingForm.dataset.confirmed = '1';
+      pendingForm.submit();
+    });
+  })();
+  </script>
+</body>
+</html>

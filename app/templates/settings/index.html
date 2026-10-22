@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}{{ t('nav_settings') }}{% endblock %}
+{% block header_title %}{{ t('nav_settings') }}{% endblock %}
+{% block header_back %}<img class="app-header-logo" src="{{ url_for('static', filename='brand/header-mascot.png') }}" alt="">{% endblock %}
+{% block content %}
+<form method="post" class="settings-form"
+      hx-post="{{ url_for('settings.index') }}" hx-trigger="change" hx-swap="none"
+      hx-on::after-request="if (event.detail.successful && this.dataset.reload) window.location.reload();">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+  <label class="settings-toggle">
+    <span>{{ t('settings_dark_mode') }}</span>
+    <input type="checkbox" name="dark_mode" id="dark-mode-toggle" {% if current_user.DarkMode %}checked{% endif %}
+           onchange="document.documentElement.dataset.theme = this.checked ? 'dark' : 'light';">
+  </label>
+
+  <label class="settings-toggle">
+    <span>{{ t('settings_youtube_music') }}</span>
+    <input type="checkbox" name="youtube_music" id="youtube-music-toggle" {% if current_user.YoutubeMusicEnabled %}checked{% endif %}
+           onclick="tunoovaConfirmYoutubeMusic(event, this)">
+  </label>
+
+  <label class="settings-field">
+    <span>{{ t('settings_stream_quality') }}</span>
+    <select name="stream_quality">
+      <option value="auto" {% if current_user.StreamQuality == 'auto' %}selected{% endif %}>{{ t('settings_quality_auto') }}</option>
+      <option value="high" {% if current_user.StreamQuality == 'high' %}selected{% endif %}>{{ t('settings_quality_high') }}</option>
+      <option value="low" {% if current_user.StreamQuality == 'low' %}selected{% endif %}>{{ t('settings_quality_low') }}</option>
+    </select>
+  </label>
+
+  <label class="settings-field">
+    <span>{{ t('settings_language') }}</span>
+    <select name="langue" onchange="this.form.dataset.reload = '1';">
+      <option value="fr" {% if current_user.Langue == 'fr' %}selected{% endif %}>Français</option>
+      <option value="en" {% if current_user.Langue == 'en' %}selected{% endif %}>English</option>
+    </select>
+  </label>
+</form>
+
+<div class="settings-actions-row">
+  <button type="button" class="btn-secondary settings-clear-cache" onclick="tunoovaClearLocalCache(this)">
+    {{ t('settings_clear_cache') }}
+  </button>
+
+  <button type="button" class="btn-secondary settings-about" onclick="document.getElementById('about-modal').showModal()">
+    {{ t('settings_about') }}
+  </button>
+</div>
+
+<dialog id="youtube-music-modal" class="app-modal">
+  <div class="app-modal-header">
+    <h2>{{ t('settings_youtube_music_confirm_title') }}</h2>
+  </div>
+  <div class="app-modal-body">
+    <p>{{ t('settings_youtube_music_confirm_message') }}</p>
+    <div class="modal-actions">
+      <button type="button" class="btn-secondary" onclick="this.closest('dialog').close('no')">{{ t('common_no') }}</button>
+      <button type="button" class="btn-dark" onclick="this.closest('dialog').close('yes')">{{ t('common_yes') }}</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="about-modal" class="app-modal">
+  <div class="app-modal-header">
+    <h2>{{ t('settings_about') }}</h2>
+    <button type="button" class="app-modal-close" onclick="this.closest('dialog').close()" aria-label="{{ t('common_back') }}">{{ icon('x') }}</button>
+  </div>
+  <div class="app-modal-body">
+    <div class="about-identity">
+      <img class="about-logo" src="{{ url_for('static', filename='brand/header-mascot.png') }}" alt="">
+      <span class="about-app-name">{{ t('app_name') }}</span>
+    </div>
+    <ul class="about-info-list">
+      <li>{{ icon('info') }}<span>{{ t('settings_about_version', version=app_version) }}</span></li>
+      <li>{{ icon('calendar') }}<span>{{ t('settings_about_release_date', date=app_release_date) }}</span></li>
+      <li>{{ icon('user') }}<span>{{ t('settings_about_author', author=app_author) }}</span></li>
+      <li>{{ icon('external-link') }}<span>{{ t('settings_about_open_source') }} <a href="{{ app_repo_url }}" target="_blank" rel="noopener">GitHub</a>.</span></li>
+    </ul>
+    <div class="modal-actions">
+      <button type="button" class="btn-dark" onclick="this.closest('dialog').close()">{{ t('common_ok') }}</button>
+    </div>
+  </div>
+</dialog>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Activation de YouTube Music : l'utilisateur doit d'abord accepter les
+// conditions d'utilisation (Oui = coche et enregistre, Non = reste decoche).
+function tunoovaConfirmYoutubeMusic(event, checkbox) {
+  if (!checkbox.checked) return;  // desactivation : pas de confirmation
+  event.preventDefault();         // la case reste decochee et aucun "change" n'est emis
+  const modal = document.getElementById("youtube-music-modal");
+  modal.returnValue = "";
+  modal.addEventListener("close", function () {
+    if (modal.returnValue === "yes") {
+      checkbox.checked = true;
+      checkbox.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+  }, { once: true });
+  modal.showModal();
+}
+
+function tunoovaClearLocalCache(buttonEl) {
+  try {
+    localStorage.clear();
+    sessionStorage.clear();
+  } catch (e) {}
+  if (window.caches && caches.keys) {
+    caches.keys().then((names) => names.forEach((name) => caches.delete(name)));
+  }
+  const original = buttonEl.textContent;
+  buttonEl.textContent = "{{ t('settings_cache_cleared') }}";
+  setTimeout(() => { buttonEl.textContent = original; }, 2000);
+}
+</script>
+{% endblock %}

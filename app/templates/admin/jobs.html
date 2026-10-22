@@ -1,0 +1,130 @@
+{% extends "admin/layout.html" %}
+{% block title %}{{ t('admin_jobs_title') }}{% endblock %}
+{% block content_class %}admin-content-wide{% endblock %}
+{% block content %}
+<h1>{{ t('admin_jobs_title') }}</h1>
+
+{% for job in jobs %}
+  {# Formulaire "hors table" (un <form> ne peut pas s'etendre sur plusieurs <td>
+     d'une meme ligne) ; les champs de la ligne s'y rattachent via l'attribut
+     form="..." plutot que par imbrication DOM. #}
+  <form id="job-form-{{ job.id }}" method="post" action="{{ url_for('admin.update_job', job_id=job.id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  </form>
+{% endfor %}
+
+<div class="admin-table-wrap">
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>{{ t('admin_col_job') }}</th>
+        <th>{{ t('admin_col_enabled') }}</th>
+        <th>{{ t('admin_col_cron') }}</th>
+        <th>{{ t('admin_col_last_run') }}</th>
+        <th>{{ t('admin_col_result') }}</th>
+        <th>{{ t('admin_col_next_run') }}</th>
+        <th>{{ t('admin_col_actions') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for job in jobs %}
+        <tr data-job-id="{{ job.id }}" data-running="{{ '1' if job.running else '0' }}">
+          <td>{{ job.label }}</td>
+          <td><input type="checkbox" name="enabled" form="job-form-{{ job.id }}" {{ "checked" if job.enabled else "" }}></td>
+          <td><input type="text" name="cron" value="{{ job.cron }}" form="job-form-{{ job.id }}" class="admin-cron-input"></td>
+          <td class="job-last-run">{{ job.last_run.strftime('%d/%m/%Y %H:%M:%S') if job.last_run else "—" }}</td>
+          <td class="job-result">
+            {% if job.running %}
+              <em>{{ t('admin_job_running') }}</em>
+            {% elif job.last_error %}
+              <span class="text-error">{{ t('admin_error_prefix') }}{{ job.last_error }}</span>
+            {% elif job.last_detail %}
+              {{ job.last_detail }}
+            {% else %}
+              —
+            {% endif %}
+          </td>
+          <td class="job-next-run">{{ job.next_run.strftime('%d/%m/%Y %H:%M:%S') if job.next_run else "—" }}</td>
+          <td class="admin-table-actions">
+            <button type="submit" form="job-form-{{ job.id }}" class="btn-link">{{ t('common_save') }}</button>
+            <form method="post" action="{{ url_for('admin.run_job', job_id=job.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn-link job-run-btn" {{ "disabled" if job.running else "" }}>{{ t('admin_run_now') }}</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script>
+(function () {
+  // Tant qu'au moins un job est "en cours", interroge le statut toutes les
+  // 2 s et met a jour les lignes du tableau (plus besoin de recharger).
+  var statusUrl = {{ url_for('admin.jobs_status')|tojson }};
+  var i18n = {
+    running: {{ t('admin_job_running')|tojson }},
+    errorPrefix: {{ t('admin_error_prefix')|tojson }},
+  };
+  var POLL_MS = 2000;
+  var timer = null;
+
+  function anyRunning() {
+    return document.querySelector('tr[data-job-id][data-running="1"]') !== null;
+  }
+
+  function renderResult(cell, job) {
+    cell.textContent = '';
+    if (job.running) {
+      var em = document.createElement('em');
+      em.textContent = i18n.running;
+      cell.appendChild(em);
+    } else if (job.last_error) {
+      var span = document.createElement('span');
+      span.className = 'text-error';
+      span.textContent = i18n.errorPrefix + job.last_error;
+      cell.appendChild(span);
+    } else {
+      cell.textContent = job.last_detail || '—';
+    }
+  }
+
+  function applyStatus(jobs) {
+    jobs.forEach(function (job) {
+      var row = document.querySelector('tr[data-job-id="' + job.id + '"]');
+      if (!row) return;
+      row.dataset.running = job.running ? '1' : '0';
+      row.querySelector('.job-last-run').textContent = job.last_run || '—';
+      row.querySelector('.job-next-run').textContent = job.next_run || '—';
+      renderResult(row.querySelector('.job-result'), job);
+      row.querySelector('.job-run-btn').disabled = job.running;
+    });
+  }
+
+  function poll() {
+    timer = null;
+    fetch(statusUrl, { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
+      .then(function (resp) {
+        if (!resp.ok || resp.headers.get('Content-Type').indexOf('application/json') === -1) {
+          throw new Error('bad response');
+        }
+        return resp.json();
+      })
+      .then(function (data) {
+        applyStatus(data.jobs);
+        schedule();
+      })
+      .catch(function () { /* session expiree, reseau... : on arrete le polling */ });
+  }
+
+  function schedule() {
+    if (timer === null && anyRunning()) {
+      timer = setTimeout(poll, POLL_MS);
+    }
+  }
+
+  schedule();
+})();
+</script>
+{% endblock %}

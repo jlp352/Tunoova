@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% import "library/_macros.html" as m %}
+{% block title %}{{ artist.Name }}{% endblock %}
+{% block header_back %}
+  <a class="icon-btn back-btn" href="{{ back_url }}" aria-label="{{ t('common_back') }}">{{ icon('arrow-left') }}</a>
+{% endblock %}
+{% block header_title %}{{ artist.Name }}{% endblock %}
+{% block content %}
+<div class="library-screen">
+  <ul class="track-list">
+    {% if show_top %}
+      {{ m.top_tracks_row(artist.Name) }}
+    {% endif %}
+    {% for a in albums %}
+      {{ m.album_li(a, fav, show_artist=False, back=request.full_path.rstrip('?') if fav else None) }}
+    {% endfor %}
+    {% for track in loose_tracks %}
+      {{ m.track_li(track, track.TrackId in new_ids) }}
+    {% else %}
+      {% if not albums and not show_top and not fav %}
+        <li class="track-item empty-state">{{ t('library_no_tracks') }}</li>
+      {% endif %}
+    {% endfor %}
+    {% if show_top or fav %}
+      {{ m.other_albums_row(artist, fav) }}
+    {% endif %}
+  </ul>
+</div>
+{% endblock %}

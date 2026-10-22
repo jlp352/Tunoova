@@ -1,0 +1,36 @@
+{% extends "admin/layout.html" %}
+{% block title %}{{ table_name }} — {{ t('admin_db_title') }}{% endblock %}
+{% block content %}
+<p><a href="{{ url_for('admin.db_table_rows', table_name=table_name) }}" class="btn-link">&larr; {{ table_name }}</a></p>
+<h1>{{ t('admin_add_row') if mode == "new" else t('admin_edit_row') }}</h1>
+
+<form method="post" class="admin-row-form">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+  {% if mode == "edit" %}
+    <label>
+      {{ pk_name }}
+      <input type="text" value="{{ pk_value }}" disabled>
+    </label>
+  {% endif %}
+
+  {% for field in fields %}
+    <label>
+      {{ field.name }}{% if field.sensitive %} {{ t('admin_not_editable') }}{% endif %}
+      {% if field.sensitive %}
+        <input type="text" value="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" disabled>
+      {% elif field.type == "boolean" %}
+        <input type="checkbox" name="{{ field.name }}" {{ "checked" if field.value else "" }}>
+      {% elif field.type == "date" %}
+        <input type="date" name="{{ field.name }}" value="{{ field.value or "" }}" {{ "required" if field.required else "" }}>
+      {% elif field.type == "datetime" %}
+        <input type="datetime-local" name="{{ field.name }}" value="{{ field.value or "" }}" {{ "required" if field.required else "" }}>
+      {% else %}
+        <input type="text" name="{{ field.name }}" value="{{ field.value if field.value is not none else "" }}" {{ "required" if field.required else "" }}>
+      {% endif %}
+    </label>
+  {% endfor %}
+
+  <button type="submit" class="btn-primary">{{ t('common_save') }}</button>
+</form>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}{{ t('app_name') }}{% endblock %}
+{% block content %}
+<div class="auth-screen">
+  <h1 class="brand-title">{{ t('app_name') }}</h1>
+  <p class="form-error">Ce lien est invalide ou a expiré. Merci de refaire une demande.</p>
+  <a class="btn-primary" href="{{ url_for('auth.signin') }}">{{ t('signin_title') }}</a>
+</div>
+{% endblock %}

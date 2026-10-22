@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="{{ current_locale() }}" data-theme="{{ 'dark' if current_user.is_authenticated and current_user.DarkMode else 'light' }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>{% block title %}{{ t('app_name') }}{% endblock %}</title>
+  <link rel="icon" href="{{ url_for('static', filename='brand/favicon.ico') }}" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='brand/favicon-32.png') }}">
+  <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='brand/favicon-192.png') }}">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='brand/apple-touch-icon.png') }}">
+  {% if pwa_installable %}
+  <link rel="manifest" href="{{ url_for('main.manifest') }}">
+  <meta name="theme-color" content="#5C4B87">
+  {% endif %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+  <script src="{{ url_for('static', filename='js/vendor/htmx.min.js') }}"></script>
+</head>
+<body hx-boost="true" hx-target="#app-boost-root" hx-select="#app-boost-root" hx-swap="outerHTML">
+  {% set show_chrome = show_chrome | default(true) %}
+  {% set show_header = show_header | default(show_chrome) %}
+  {% set play_screen = play_screen | default(false) %}
+
+  {#
+    Le lecteur audio persistant (#miniplayer, plus bas) doit rester en dehors
+    de la zone boostee/echangee par htmx : hx-preserve garde la meme reference
+    de noeud DOM d'une navigation a l'autre, mais l'algorithme de swap le
+    detache puis le rattache quand meme au document au passage - et un
+    <audio> qui est detache du document est mis en pause par le navigateur
+    (comportement standard), ce qui coupait/relancait la lecture a chaque
+    changement d'ecran (constate via Playwright). hx-boost reste sur <body>
+    (jamais recree) mais cible/selectionne uniquement #app-boost-root : ce
+    conteneur est rejoue a chaque navigation, tandis que #miniplayer - place
+    hors de lui - n'est plus jamais touche par un swap.
+
+    Consequence : le serveur ne peut plus piloter directement la classe
+    miniplayer-hidden sur #miniplayer via un re-rendu (il n'est jamais
+    re-rendu apres le premier chargement). L'attribut data-play-screen
+    ci-dessous est lui bien rafraichi a chaque swap (il fait partie du
+    contenu remplace) - app.js s'en sert apres chaque htmx:afterSettle pour
+    resynchroniser #miniplayer.
+
+    Autre consequence, plus subtile : n'importe quel element hx-get/hx-post
+    independant (recherche, filtres, suppression, auto-save...) A L'INTERIEUR
+    de #app-boost-root herite de ce hx-select="#app-boost-root" - sa reponse
+    (un petit fragment) ne contient pas cet id, donc htmx n'y trouve rien a
+    selectionner et vide sa cible (recherche qui "ne renvoie plus rien").
+    Correctif retenu : chacun de ces elements independants declare son PROPRE
+    hx-select, explicitement, qui correspond a ce que sa reponse contient
+    reellement (cf. app/templates/{podcast,radio,library}/index.html,
+    _macros.html, userprofile/index.html, auth/signin.html) - une valeur
+    directement posee sur un element prime toujours sur l'heritage, donc ceci
+    ne depend d'aucune regle d'heritage a interpreter.
+    NE PAS utiliser hx-disinherit="hx-select" pour ce genre de correctif, meme
+    pose uniquement sur l'element independant lui-meme (pas sur un ancetre
+    commun) : constate empiriquement (Playwright) que ca desinherite quand
+    meme hx-select pour d'AUTRES liens simplement boostes (hx-boost, sans
+    hx-get/hx-select propres) presents ailleurs sur le MEME ecran - ceux-la se
+    retrouvent alors sans hx-select DU TOUT, et htmx utilise alors le corps
+    ENTIER de la reponse (tout <body>, #miniplayer/#play-overlay inclus) comme
+    contenu de remplacement pour #app-boost-root - dupliquant #miniplayer (et
+    son <audio>, d'ou une lecture qui se met a jouer en double) a chaque
+    navigation de ce type. Le mecanisme exact de cette fuite n'est pas
+    entierement elucide, d'ou le choix du hx-select explicite (sans ambiguite)
+    plutot que de re-tenter hx-disinherit.
+  #}
+  <div id="app-boost-root" data-play-screen="{{ '1' if play_screen else '' }}">
+
+  {% if current_user.is_authenticated and show_header %}
+  <header class="app-header">
+    {% block header_back %}
+      <button class="icon-btn back-btn" onclick="history.back()" aria-label="{{ t('common_back') }}">{{ icon('arrow-left') }}</button>
+    {% endblock %}
+    <h1 class="app-header-title">{% block header_title %}{{ t('app_name') }}{% endblock %}</h1>
+    <div class="app-header-actions">
+      <button type="button" class="icon-btn" aria-label="{{ t('common_cast') }}" onclick="tunoovaOpenCastModal()">{{ icon('cast') }}</button>
+      <a class="icon-btn profile-link" href="{{ url_for('userprofile.index', next=request.path) }}" aria-label="{{ t('common_profile') }}">
+        {% if current_user.Photo %}
+          <img class="profile-thumb" src="{{ url_for('media.profile_photo') }}" alt="">
+        {% else %}
+          <span class="profile-thumb profile-thumb-placeholder">{{ current_user.FullName[:1] }}</span>
+        {% endif %}
+      </a>
+      <button type="button" class="icon-btn" aria-label="{{ t('common_logout') }}" title="{{ t('common_logout') }}"
+              onclick="document.getElementById('logout-modal').showModal()">{{ icon('log-out') }}</button>
+    </div>
+  </header>
+
+  <dialog id="logout-modal" class="app-modal">
+    <div class="app-modal-header">
+      <h2>{{ t('common_logout') }}</h2>
+      <button type="button" class="app-modal-close" onclick="this.closest('dialog').close()" aria-label="{{ t('common_back') }}">{{ icon('x') }}</button>
+    </div>
+    <div class="app-modal-body">
+      <p>{{ t('logout_confirm') }}</p>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" onclick="this.closest('dialog').close()">{{ t('common_cancel') }}</button>
+        <button type="button" class="btn-dark" onclick="window.location.href='{{ url_for('auth.logout') }}'">{{ t('common_logout') }}</button>
+      </div>
+    </div>
+  </dialog>
+
+  {#
+    Fenetre Cast (CDC §7/§8 : partagee par Home/Podcast/Radio/Play/Musique,
+    ouverte par le bouton Cast de l'en-tete - present aussi bien dans ce
+    header que dans celui de #play-overlay plus bas, tous deux appelant le
+    meme tunoovaOpenCastModal(), cf. app/static/js/app.js). Contenu (liste des
+    enceintes) toujours rempli en JS via GET /cast/devices a l'ouverture -
+    aucun besoin d'etre preserve d'un swap htmx a l'autre (pas d'<audio>
+    ici, contrairement a #miniplayer/#play-overlay).
+  #}
+  <dialog id="cast-modal" class="app-modal">
+    <div class="app-modal-header">
+      <h2>{{ icon('cast') }} {{ t('cast_title') }}</h2>
+      <button type="button" class="app-modal-close" onclick="this.closest('dialog').close()" aria-label="{{ t('common_back') }}">{{ icon('x') }}</button>
+    </div>
+    <div class="app-modal-body">
+      <p class="cast-modal-message" id="cast-modal-message" hidden></p>
+      <div class="cast-device-list" id="cast-device-list">
+        <p class="empty-state" id="cast-device-empty" hidden>{{ t('cast_no_devices') }}</p>
+      </div>
+    </div>
+    <template id="cast-device-icon-template">{{ icon('cast') }}</template>
+  </dialog>
+  {% endif %}
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-container">
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ t(message) }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <main class="app-content{% if play_screen %} app-content-player{% endif %}{% if not (current_user.is_authenticated and show_chrome) %} app-content-no-chrome{% endif %}">
+    {% block content %}{% endblock %}
+  </main>
+
+  {% if current_user.is_authenticated and show_chrome %}
+  <nav class="bottom-nav">
+    <a href="{{ url_for('main.home') }}">{{ icon('house') }}<span>{{ t('nav_home') }}</span></a>
+    <a href="{{ url_for('podcast.index') }}"><img src="{{ url_for('static', filename='nav_icons/podcast.png') }}" alt=""><span>{{ t('nav_podcast') }}</span></a>
+    <a href="{{ url_for('radio.index') }}"><img src="{{ url_for('static', filename='nav_icons/radio.png') }}" alt=""><span>{{ t('nav_radio') }}</span></a>
+    <a href="{{ url_for('library.index') }}"><img src="{{ url_for('static', filename='nav_icons/songs-folder.png') }}" alt=""><span>{{ t('nav_library') }}</span></a>
+    <a href="{{ url_for('notifications.index') }}" class="bottom-nav-notif">
+      <span class="bottom-nav-icon-wrap">
+        <img src="{{ url_for('static', filename='nav_icons/notification.png') }}" alt="">
+        {% if notifications_count %}<span class="nav-badge">{{ notifications_count }}</span>{% endif %}
+      </span>
+      <span>{{ t('nav_notifications') }}</span>
+    </a>
+    <a href="{{ url_for('settings.index') }}">{{ icon('settings') }}<span>{{ t('nav_settings') }}</span></a>
+  </nav>
+  {% endif %}
+
+  {% block scripts %}{% endblock %}
+  </div>
+
+  {% if current_user.is_authenticated and show_chrome %}
+  <div id="miniplayer" class="miniplayer{% if play_screen %} miniplayer-hidden{% endif %}"
+       {% if current_play %}data-play-url="{{ current_play.play_url }}" data-position="{{ current_play.position }}" data-playing="{{ '1' if current_play.playing else '' }}"{% endif %}
+       {% if current_play and current_play.cast_device_label %}data-casting="1" data-cast-playing="{{ '1' if current_play.playing else '0' }}" data-cast-device-id="{{ current_play.cast_device_id }}"{% endif %}>
+    <audio id="miniplayer-audio" {% if current_play %}src="{{ current_play.stream_url }}"{% endif %}></audio>
+    {# Prechargement du debut du morceau suivant quand il ne tient pas en memoire (cf. tunoovaPreloadInElement) #}
+    <audio id="miniplayer-audio-next" preload="auto" muted></audio>
+    <img id="miniplayer-thumb" class="miniplayer-thumb" alt=""
+         {% if current_play and current_play.thumbnail %}src="{{ current_play.thumbnail }}"{% else %}hidden{% endif %}>
+    <div class="miniplayer-info">
+      <span class="miniplayer-title">{{ current_play.title if current_play else t('miniplayer_no_source') }}</span>
+      <span class="miniplayer-subtitle">{{ current_play.subtitle if current_play else '' }}</span>
+      <div class="miniplayer-cast-row" id="miniplayer-cast-row" {% if not (current_play and current_play.cast_device_label) %}hidden{% endif %}>
+        <span class="cast-pill miniplayer-cast-badge" id="miniplayer-cast-badge" role="button" tabindex="0" aria-label="{{ t('common_cast') }}"
+              onclick="event.stopPropagation(); tunoovaOpenCastModal()"
+              onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.stopPropagation(); tunoovaOpenCastModal(); }">
+          {{ icon('cast') }}<span id="miniplayer-cast-label">{{ (current_play and current_play.cast_device_label) or '' }}</span>
+        </span>
+        <input type="range" class="cast-volume-range miniplayer-cast-volume" id="miniplayer-cast-volume" min="0" max="100" step="1" value="50"
+               aria-label="{{ t('cast_volume') }}" title="{{ t('cast_volume') }}">
+      </div>
+    </div>
+    <button id="miniplayer-toggle" class="icon-btn miniplayer-toggle{% if current_play and current_play.playing %} is-playing{% endif %}" aria-label="Play/Pause">{{ icon('play', 'miniplayer-icon-play') }}{{ icon('pause', 'miniplayer-icon-pause') }}</button>
+    <button id="miniplayer-mixer" class="icon-btn" aria-label="{{ t('play_title') }}" onclick="tunoovaOpenPlayer()">{{ icon('sliders-horizontal') }}</button>
+  </div>
+  {% endif %}
+
+  {#
+    Panneau "Lecture en cours" affiche par-dessus l'ecran courant, sans
+    navigation (cf. tunoovaOpenPlayer/tunoovaShowPlayOverlay dans
+    app/static/js/app.js) - la meme raison qu'au-dessus impose qu'il reste
+    lui aussi hors de #app-boost-root. Rendu vide (ctx=None) et cache ici sur
+    les autres ecrans ; rempli en JS via GET /play/<type>/<id>/data au moment
+    de l'ouverture.
+
+    TOUJOURS present, y compris sur la page complete /play/... (play_screen) :
+    c'est elle qui y fournit directement le contenu (ctx reel, non cache -
+    app/templates/play/index.html ne rend plus rien dans son propre bloc
+    content). Auparavant absent sur cette page (pour eviter le doublon d'id
+    avec un rendu local de _screen_body.html) - mais #play-overlay vit HORS
+    de #app-boost-root, donc une fois cette page atteinte une seule fois
+    (lien direct, partage, rafraichissement), plus aucune navigation boostee
+    ulterieure ne le recreait : ouvrir "Lecture en cours" depuis n'importe
+    quel autre ecran de la meme session retombait alors indefiniment sur le
+    repli window.location.href (vrai rechargement, <audio> recree, coupure -
+    constate et confirme par l'utilisateur via le message d'erreur ajoute
+    dans tunoovaShowPlayOverlay). D'ou l'unification : un seul rendu de
+    _screen_body.html, toujours a cet endroit, visible d'emblee (pas de
+    `hidden`) uniquement quand play_screen est vrai.
+  #}
+  {% if current_user.is_authenticated and show_chrome %}
+  <div id="play-overlay" {% if not play_screen %}hidden{% endif %}>
+    <header class="app-header">
+      <button class="icon-btn back-btn" onclick="tunoovaClosePlayOverlay()" aria-label="{{ t('common_back') }}">{{ icon('arrow-left') }}</button>
+      <h1 class="app-header-title">{{ t('play_title') }}</h1>
+      <div class="app-header-actions">
+        <button type="button" class="icon-btn" aria-label="{{ t('common_cast') }}" onclick="tunoovaOpenCastModal()">{{ icon('cast') }}</button>
+        <a class="icon-btn profile-link" href="{{ url_for('userprofile.index', next=request.path) }}" aria-label="{{ t('common_profile') }}">
+          {% if current_user.Photo %}
+            <img class="profile-thumb" src="{{ url_for('media.profile_photo') }}" alt="">
+          {% else %}
+            <span class="profile-thumb profile-thumb-placeholder">{{ current_user.FullName[:1] }}</span>
+          {% endif %}
+        </a>
+        <button type="button" class="icon-btn" aria-label="{{ t('common_logout') }}" title="{{ t('common_logout') }}"
+                onclick="document.getElementById('logout-modal').showModal()">{{ icon('log-out') }}</button>
+      </div>
+    </header>
+    <div class="play-overlay-body">
+      {% include "play/_screen_body.html" %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if current_user.is_authenticated %}
+  <script>
+    window.tunoovaCastLabels = {
+      soundtouch: {{ t('cast_device_type_soundtouch')|tojson }},
+      dlna: {{ t('cast_device_type_dlna')|tojson }},
+      active: {{ t('cast_active_badge')|tojson }},
+      offline: {{ t('cast_offline_badge')|tojson }},
+      stop: {{ t('cast_stop_action')|tojson }}
+    };
+  </script>
+  {% endif %}
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

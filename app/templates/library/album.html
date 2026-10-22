@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% import "library/_macros.html" as m %}
+{% block title %}{{ album.Title }}{% endblock %}
+{% block header_back %}
+  <a class="icon-btn back-btn" href="{{ back_url }}" aria-label="{{ t('common_back') }}">{{ icon('arrow-left') }}</a>
+{% endblock %}
+{% block header_title %}{{ album.Title }}{% endblock %}
+{% block content %}
+<div class="library-screen">
+  <div class="library-detail-header">
+    <h2 class="library-detail-title">{{ album.artist.Name }}</h2>
+    <p class="library-detail-subtitle">{{ album.Title }}{% if album.Year %} ({{ album.Year }}){% endif %}</p>
+  </div>
+  <ul class="track-list">
+    {% for track in tracks %}
+      {{ m.track_li(track, track.TrackId in new_ids) }}
+    {% else %}
+      <li class="track-item empty-state">{{ t('library_no_tracks') }}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if autoplay_url %}
+<script>
+// tunoovaAutoplayOnce vient de app.js, charge APRES ce bloc dans le HTML
+// (cf. base.html : #miniplayer/app.js sont hors de #app-boost-root, qui
+// contient ce script - necessaire pour que la lecture survive aux
+// navigations sans etre coupee). Sur un premier chargement complet de
+// cette page (lien direct, rafraichissement), la fonction n'existe donc pas
+// encore au moment ou ce script s'execute - on patiente jusqu'a ce qu'elle
+// soit definie (quasi instantane, app.js est un petit fichier local).
+(function tunoovaTryAutoplay() {
+  if (typeof tunoovaAutoplayOnce === "function") {
+    tunoovaAutoplayOnce({{ autoplay_url|tojson }});
+  } else {
+    setTimeout(tunoovaTryAutoplay, 10);
+  }
+})();
+</script>
+{% endif %}
+{% endblock %}

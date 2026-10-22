@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% import "library/_macros.html" as m %}
+{% block title %}{{ name }}{% endblock %}
+{% block header_back %}
+  <a class="icon-btn back-btn" href="{{ back_url }}" aria-label="{{ t('common_back') }}">{{ icon('arrow-left') }}</a>
+{% endblock %}
+{% block header_title %}{{ name }}{% endblock %}
+{% block content %}
+<div class="library-screen">
+  <ul class="track-list">
+    {% if show_top is not defined or show_top %}
+      {{ m.top_tracks_row(name) }}
+    {% endif %}
+    {# Ecran "Autres albums" : albums de la bibliotheque avant ceux de YouTube #}
+    {% for a in local_albums or [] %}
+      {{ m.album_li(a, show_artist=False, back=request.full_path.rstrip('?')) }}
+    {% endfor %}
+    {% for a in albums %}
+      {{ m.yt_album_row(a, request.full_path.rstrip('?')) }}
+    {% else %}
+      {% if not local_albums %}
+        <li class="track-item empty-state">{{ t('library_no_albums') }}</li>
+      {% endif %}
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

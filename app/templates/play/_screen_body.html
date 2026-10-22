@@ -1,0 +1,175 @@
+{#
+  Corps partage de l'ecran "Lecture en cours" :
+  - rendu avec `ctx` reel par play/index.html (page complete, repli SSR
+    pour lien direct/partage/rafraichissement/JS desactive) ;
+  - rendu avec `ctx=None` par le panneau #play-overlay dans base.html
+    (squelette vide, rempli en JS sans navigation - cf. app/static/js/app.js
+    tunoovaFillPlayOverlay). `other_users` reste toujours fourni par le
+    serveur (independant de l'item affiche).
+#}
+<div class="play-screen" id="play-screen" data-content-type="{{ content_type or '' }}" data-item-id="{{ item_id or '' }}">
+  <div class="play-header">
+    <img class="play-header-mascot" src="{{ url_for('static', filename='brand/header-mascot.png') }}" alt="">
+    <img class="play-header-badge" src="{{ url_for('static', filename='brand/wordmark.png') }}" alt="{{ t('app_name') }}">
+  </div>
+
+  <div class="play-body">
+    <div class="play-cover" id="play-cover">
+      {% if ctx and ctx.cover_url %}
+        <img id="play-cover-img" src="{{ ctx.cover_url }}" alt=""
+             onerror="this.replaceWith(Object.assign(document.createElement('span'), {className: 'play-cover-placeholder', id: 'play-cover-placeholder', textContent: {{ ctx.image_placeholder|tojson }}}))">
+      {% elif ctx and ctx.image_url %}
+        <img id="play-cover-img" src="{{ ctx.image_url }}" alt="">
+      {% else %}
+        <span class="play-cover-placeholder" id="play-cover-placeholder">{{ ctx.image_placeholder if ctx else '' }}</span>
+      {% endif %}
+    </div>
+
+    <h1 class="play-title{% if ctx and content_type == 'podcast' %} play-title-podcast{% endif %}" id="play-title">
+      {%- if ctx -%}
+        {{ ctx.subtitle if content_type == 'podcast' else ctx.title }}
+      {%- endif -%}
+    </h1>
+    <p class="play-subtitle{% if ctx and content_type == 'podcast' %} play-subtitle-episode{% endif %}" id="play-subtitle">
+      {%- if ctx -%}
+        {{ ctx.title if content_type == 'podcast' else (t(ctx.subtitle) if content_type == 'radio' else ctx.subtitle) }}
+      {%- endif -%}
+    </p>
+
+    {#
+      Indicateur "diffusion sur une enceinte externe" (Doc/A faire.md - Play :
+      "Afficher si l'ecoute en local et si sur cast device"). Etat cote
+      utilisateur (pas lie a l'item affiche) : rempli au chargement de page
+      via current_play.cast_device_label (SSR), et bascule ensuite en JS
+      (tunoovaSetCasting/tunoovaClearCasting, app/static/js/app.js) au moment
+      ou l'utilisateur choisit/arrete une enceinte dans la fenetre Cast, sans
+      attendre un rechargement complet.
+    #}
+    <div class="play-cast-badge" id="play-cast-badge" {% if not (current_play and current_play.cast_device_label) %}hidden{% endif %}>
+      <span class="cast-pill" role="button" tabindex="0" aria-label="{{ t('common_cast') }}"
+            onclick="tunoovaOpenCastModal()"
+            onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); tunoovaOpenCastModal(); }">
+        {{ icon('cast') }}<span id="play-cast-device-label">{{ (current_play and current_play.cast_device_label) or '' }}</span>
+      </span>
+      <input type="range" class="cast-volume-range play-cast-volume" min="0" max="100" step="1" value="50"
+             aria-label="{{ t('cast_volume') }}" title="{{ t('cast_volume') }}">
+    </div>
+
+    <div class="play-actions-row">
+      <form method="post" action="{{ url_for('play.like', content_type=content_type, item_id=item_id) if ctx else '#' }}" class="play-like-form" id="play-like-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" name="value" value="Like" id="play-like-btn" class="play-action-btn {% if ctx and ctx.item[ctx.like_attr] == 'Like' %}active{% endif %}" aria-label="{{ t('play_like') }}">
+          {{ icon('thumbs-up') }}
+          <span id="play-like-count">{{ (ctx.catalog[ctx.catalog_like_attr] or 0) if ctx and ctx.catalog else 0 }}</span>
+        </button>
+        <button type="submit" name="value" value="Not Like" id="play-not-like-btn" class="play-action-btn {% if ctx and ctx.item[ctx.like_attr] == 'Not Like' %}active{% endif %}" aria-label="{{ t('play_not_like') }}">
+          {{ icon('thumbs-down') }}
+          <span id="play-not-like-count">{{ (ctx.catalog[ctx.catalog_notlike_attr] or 0) if ctx and ctx.catalog else 0 }}</span>
+        </button>
+      </form>
+      <button type="button" class="play-action-btn{% if ctx and comment_active %} active{% endif %}" id="play-comment-btn" onclick="tunoovaOpenComments()">
+        {{ icon('message-square') }}
+        <span id="play-comment-count">{{ (ctx.catalog[ctx.catalog_comment_attr] or 0) if ctx and ctx.catalog else 0 }}</span>
+        <span>{{ t('play_comment_label') }}</span>
+      </button>
+      {# Ecoutes tous utilisateurs (MusicTrack.MusicCount, Radio.RadioCount, Podcast.PodcastCount) #}
+      {% set listens = ctx.catalog[ctx.listen_attr] if ctx and ctx.listen_attr and ctx.catalog else none %}
+      <span class="play-action-btn play-listen-count" id="play-listen-count" title="{{ t('play_listen_count') }}" {% if listens is none %}hidden{% endif %}>
+        {{ icon('headphones') }}
+        <span id="play-listen-count-value">{{ short_count(listens) }}</span>
+      </span>
+      <button type="button" class="play-action-btn" aria-label="{{ t('play_share_label') }}" onclick="document.getElementById('play-share-modal').showModal()">
+        {{ icon('share-2') }}
+      </button>
+    </div>
+
+    <div class="play-progress" id="play-progress" {% if not (ctx and ctx.show_progress) %}hidden{% endif %}>
+      <input type="range" id="play-seek" min="0" max="100" value="0" step="0.1">
+      <div class="play-progress-times">
+        <span id="play-time-current">0:00</span>
+        <span id="play-time-total">0:00</span>
+      </div>
+    </div>
+    <div class="play-transport" id="play-transport" {% if not (ctx and ctx.show_progress) %}hidden{% endif %}>
+      <a class="play-transport-btn{% if not (ctx and ctx.prev_id) %} disabled{% endif %}" id="play-prev-btn"
+         {% if ctx and ctx.prev_id %}href="{{ url_for('play.show', content_type=content_type, item_id=ctx.prev_id) }}" data-item-id="{{ ctx.prev_id }}"{% endif %}
+         title="{{ t('play_prev') }}">{{ icon('skip-back') }}</a>
+      <button type="button" class="play-toggle-btn" id="play-toggle" title="Play/Pause" onclick="document.getElementById('miniplayer-toggle').click()">
+        <span id="play-toggle-play-icon" {% if ctx and current_play and current_play.playing %}hidden{% endif %}>{{ icon('play') }}</span>
+        <span id="play-toggle-pause-icon" {% if not (ctx and current_play and current_play.playing) %}hidden{% endif %}>{{ icon('pause') }}</span>
+      </button>
+      <a class="play-transport-btn{% if not (ctx and ctx.next_id) %} disabled{% endif %}" id="play-next-btn"
+         {% if ctx and ctx.next_id %}href="{{ url_for('play.show', content_type=content_type, item_id=ctx.next_id) }}" data-item-id="{{ ctx.next_id }}"{% endif %}
+         title="{{ t('play_next') }}">{{ icon('skip-forward') }}</a>
+    </div>
+  </div>
+</div>
+
+{#
+  Musique (data-thread="1") : fil de commentaires de tous les utilisateurs,
+  charge a l'ouverture (tunoovaOpenComments, app/static/js/app.js), et chaque
+  envoi ajoute un commentaire. Podcast/radio : un commentaire personnel,
+  modifiable.
+#}
+<dialog id="play-comment-modal" class="app-modal"
+        data-thread="{{ '1' if ctx and ctx.comment_thread else '' }}"
+        data-comments-url="{{ url_for('play.comments', content_type=content_type, item_id=item_id) if ctx and ctx.comment_thread else '' }}"
+        data-label-publish="{{ t('play_comment_publish') }}"
+        data-label-save="{{ t('play_comment_save') }}"
+        data-label-delete="{{ t('play_comment_delete') }}">
+  <div class="app-modal-header">
+    <h2>{{ t('play_comments_title') }}</h2>
+    <button type="button" class="app-modal-close" onclick="this.closest('dialog').close()" aria-label="{{ t('common_back') }}">{{ icon('x') }}</button>
+  </div>
+  <div class="app-modal-body">
+    <div class="play-comment">
+      <template id="play-comment-delete-icon">{{ icon('trash-2') }}</template>
+      <ul class="play-comment-list" id="play-comment-list" hidden></ul>
+      <p class="empty-state" id="play-comment-empty" hidden>{{ t('play_comment_empty') }}</p>
+      <form method="post" action="{{ url_for('play.comment', content_type=content_type, item_id=item_id) if ctx else '#' }}" id="play-comment-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <textarea name="text" id="play-comment-text" rows="3" placeholder="{{ t('play_comment_placeholder') }}">{{ (ctx.item[ctx.comment_attr] or '') if ctx and ctx.comment_attr else '' }}</textarea>
+        <div class="modal-actions">
+          <button type="submit" class="btn-secondary" id="play-comment-submit">{{ t('play_comment_publish') if ctx and ctx.comment_thread else t('play_comment_save') }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="play-share-modal" class="app-modal">
+  <div class="app-modal-header">
+    <h2>{{ t('play_share_label') }}</h2>
+    <button type="button" class="app-modal-close" onclick="this.closest('dialog').close()" aria-label="{{ t('common_back') }}">{{ icon('x') }}</button>
+  </div>
+  <div class="app-modal-body">
+    <div class="play-share">
+      {% if other_users %}
+        {# Liste defilante (10 utilisateurs visibles), bouton Envoyer fixe en dessous #}
+        <form method="post" action="{{ url_for('play.share', content_type=content_type, item_id=item_id) if ctx else '#' }}" id="play-share-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <p class="play-share-prompt" id="play-share-prompt"
+             data-music="{{ t('play_share_prompt_music') }}"
+             data-podcast="{{ t('play_share_prompt_podcast') }}"
+             data-radio="{{ t('play_share_prompt_radio') }}">{{ t('play_share_prompt_' ~ content_type) if ctx else '' }}</p>
+          <ul class="play-share-list">
+            {% for u in other_users %}
+              <li>
+                <label class="play-share-user">
+                  <input type="checkbox" name="to_users_id" value="{{ u.UsersId }}">
+                  <span>{{ u.FullName }}</span>
+                </label>
+              </li>
+            {% endfor %}
+          </ul>
+          <p class="play-share-message" id="play-share-message" hidden></p>
+          <div class="modal-actions">
+            <button type="submit" class="btn-dark" id="play-share-submit" disabled>{{ t('play_share_send') }}</button>
+          </div>
+        </form>
+      {% else %}
+        <p class="empty-state">{{ t('play_share_no_users') }}</p>
+      {% endif %}
+    </div>
+  </div>
+</dialog>

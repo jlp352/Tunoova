@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% set show_chrome = false %}
+{% block title %}{{ t('signin_privacy_title') }} - {{ t('app_name') }}{% endblock %}
+{% block content %}
+<div class="legal-page">
+  <div class="legal-page-header">
+    <button type="button" class="icon-btn back-btn" onclick="history.back()" aria-label="{{ t('common_back') }}">{{ icon('arrow-left') }}</button>
+    <img class="legal-page-mascot" src="{{ url_for('static', filename='brand/header-mascot.png') }}" alt="">
+    <h1>{{ t('signin_privacy_title') }}</h1>
+  </div>
+
+  <div class="legal-page-body">
+  {% if current_locale() == 'fr' %}
+  <p class="legal-updated">Dernière mise à jour : 29/09/2026</p>
+
+  <h2>1. Introduction</h2>
+  <p>Cette politique décrit la manière dont vos données sont traitées lorsque vous utilisez l'application Tunoova.</p>
+  <p>L'Application est un logiciel <strong>auto-hébergé</strong> : elle est installée sur un serveur exploité par un opérateur indépendant, et non par l'auteur du logiciel.</p>
+  <ul>
+    <li><strong>L'auteur du logiciel ne collecte aucune donnée.</strong> Le code, publié sous licence PolyForm Noncommercial 1.0.0, n'envoie aucune information à l'auteur ni à un serveur central.</li>
+    <li><strong>Le responsable du traitement de vos données est l'Opérateur de l'instance</strong> sur laquelle l'Application est hébergée.</li>
+  </ul>
+
+  <h2>2. Données traitées</h2>
+  <p>Selon la configuration de l'instance, l'Application peut traiter :</p>
+  <ul>
+    <li><strong>Fichiers audio personnels</strong> : les fichiers (MP3, etc.) que vous importez, stockés sur le serveur de l'Opérateur pour permettre leur lecture.</li>
+    <li><strong>Préférences et données d'usage</strong> : paramètres, favoris, listes de lecture et éventuel historique d'écoute, stockés localement sur l'instance ou dans votre navigateur.</li>
+    <li><strong>Données de compte</strong> (si l'instance active une authentification) : identifiant et mot de passe, ce dernier étant stocké sous une forme hachée et non en clair.</li>
+    <li><strong>Journaux techniques (logs)</strong> : adresse IP, date et heure, pages consultées, type de navigateur et autres informations techniques éventuellement générées par le serveur à des fins de fonctionnement et de sécurité.</li>
+  </ul>
+  <p>L'Application ne demande pas de données non nécessaires à son fonctionnement et ne réalise aucun profilage publicitaire.</p>
+
+  <h2>3. Finalités et base légale</h2>
+  <p>Les données sont traitées pour :</p>
+  <ul>
+    <li>fournir les fonctionnalités de lecture audio (exécution du service) ;</li>
+    <li>assurer la sécurité et le bon fonctionnement de l'instance (intérêt légitime) ;</li>
+    <li>mémoriser vos préférences (exécution du service / consentement).</li>
+  </ul>
+
+  <h2>4. Services tiers</h2>
+  <p>Lorsque vous écoutez une radio, un podcast ou un morceau de musique, l'Application peut utiliser des API ou des services tiers.</p>
+  <p>À cette occasion, des informations techniques, notamment votre <strong>adresse IP</strong>, peuvent être communiquées directement ou indirectement au fournisseur du service tiers, selon le fonctionnement de celui-ci.</p>
+  <p>Ces échanges sont régis par les politiques de confidentialité <strong>propres à ces tiers</strong>, sur lesquelles ni l'auteur du logiciel ni l'Opérateur n'ont de contrôle.</p>
+
+  <h2>5. Cookies et stockage local</h2>
+  <p>L'Application peut utiliser des cookies ou le stockage local (localStorage) de votre navigateur afin de conserver vos préférences et, le cas échéant, votre session.</p>
+  <p>Ces données peuvent rester stockées sur votre appareil et, selon leur nature, être associées aux données conservées par l'instance.</p>
+  <p>Vous pouvez supprimer les cookies et les données de stockage local via les réglages de votre navigateur.</p>
+
+  <h2>6. Partage des données</h2>
+  <p>L'Application <strong>ne vend ni ne partage vos données à des fins commerciales</strong>.</p>
+  <p>Aucune donnée n'est transmise à des tiers, hormis :</p>
+  <ul>
+    <li>les communications techniques nécessaires avec les services tiers décrits à la section 4 ;</li>
+    <li>les transmissions éventuellement nécessaires au fonctionnement de l'Application ;</li>
+    <li>les obligations légales éventuelles auxquelles l'Opérateur serait soumis.</li>
+  </ul>
+
+  <h2>7. Stockage et sécurité</h2>
+  <p>Vos données sont stockées sur le serveur exploité par l'Opérateur.</p>
+  <p>Celui-ci met en œuvre des mesures raisonnables pour les protéger contre l'accès non autorisé, la perte, la destruction ou l'altération.</p>
+  <p>Aucun système informatique n'étant infaillible, aucune sécurité absolue ne peut toutefois être garantie.</p>
+
+  <h2>8. Durée de conservation</h2>
+  <ul>
+    <li><strong>Fichiers, préférences et données de compte</strong> : conservés tant que vous utilisez l'Application ou jusqu'à leur suppression par vous ou par l'Opérateur.</li>
+    <li><strong>Journaux techniques</strong> : conservés selon la durée définie par l'Opérateur, puis supprimés ou anonymisés.</li>
+  </ul>
+
+  <h2>9. Vos droits</h2>
+  <p>Si le RGPD s'applique, vous disposez notamment des droits d'accès, de rectification, d'effacement, de limitation du traitement, d'opposition et, lorsque les conditions sont remplies, de portabilité de vos données.</p>
+  <p>Pour exercer vos droits ou obtenir des informations concernant le traitement de vos données, contactez l'Opérateur à l'adresse indiquée dans la section 12.</p>
+  <p>Vous pouvez également introduire une réclamation auprès de l'autorité de contrôle compétente de votre pays.</p>
+
+  <h2>10. Mineurs</h2>
+  <p>L'Application n'est pas destinée aux enfants en dessous de l'âge du consentement numérique applicable dans votre juridiction.</p>
+  <p>L'Opérateur ne collecte pas sciemment de données relatives à des mineurs en dessous de cet âge.</p>
+
+  <h2>11. Modifications</h2>
+  <p>Cette politique peut être mise à jour à tout moment.</p>
+  <p>La date de dernière mise à jour figure en tête du document.</p>
+
+  <h2>12. Contact</h2>
+  <p>Pour toute question relative au traitement de vos données ou pour exercer vos droits, contactez l'Opérateur.</p>
+
+  {% else %}
+  <p class="legal-updated">Last updated: 29/09/2026</p>
+
+  <h2>1. Introduction</h2>
+  <p>This policy describes how your data is handled when you use the Tunoova application.</p>
+  <p>The Application is <strong>self-hosted</strong> software: it is installed on a server operated by an independent operator, not by the software's author.</p>
+  <ul>
+    <li><strong>The software's author collects no data.</strong> The code, published under the PolyForm Noncommercial 1.0.0 license, sends no information to the author or to any central server.</li>
+    <li><strong>The data controller for your data is the Operator of the instance</strong> on which the Application is hosted.</li>
+  </ul>
+
+  <h2>2. Data processed</h2>
+  <p>Depending on the instance's configuration, the Application may process:</p>
+  <ul>
+    <li><strong>Personal audio files</strong>: files (MP3, etc.) that you import, stored on the Operator's server to allow them to be played.</li>
+    <li><strong>Preferences and usage data</strong>: settings, favorites, playlists, and any listening history, stored locally on the instance or in your browser.</li>
+    <li><strong>Account data</strong> (if the instance enables authentication): a login identifier and password, the latter stored in hashed form and never in plain text.</li>
+    <li><strong>Technical logs</strong>: IP address, date and time, pages visited, browser type, and other technical information that may be generated by the server for operational and security purposes.</li>
+  </ul>
+  <p>The Application does not request data unnecessary for its operation and performs no advertising profiling.</p>
+
+  <h2>3. Purposes and legal basis</h2>
+  <p>Data is processed to:</p>
+  <ul>
+    <li>provide the audio playback features (performance of the service);</li>
+    <li>ensure the security and proper operation of the instance (legitimate interest);</li>
+    <li>remember your preferences (performance of the service / consent).</li>
+  </ul>
+
+  <h2>4. Third-party services</h2>
+  <p>When you listen to a radio station, a podcast, or a piece of music, the Application may use third-party APIs or services.</p>
+  <p>On these occasions, technical information, in particular your <strong>IP address</strong>, may be communicated directly or indirectly to the third-party service provider, depending on how that service operates.</p>
+  <p>These exchanges are governed by the privacy policies <strong>specific to those third parties</strong>, over which neither the software's author nor the Operator has any control.</p>
+
+  <h2>5. Cookies and local storage</h2>
+  <p>The Application may use cookies or your browser's local storage (localStorage) to retain your preferences and, where applicable, your session.</p>
+  <p>This data may remain stored on your device and, depending on its nature, may be associated with data retained by the instance.</p>
+  <p>You can delete cookies and local storage data through your browser's settings.</p>
+
+  <h2>6. Data sharing</h2>
+  <p>The Application <strong>does not sell or share your data for commercial purposes</strong>.</p>
+  <p>No data is transmitted to third parties, except for:</p>
+  <ul>
+    <li>the technical communications necessary with the third-party services described in Section 4;</li>
+    <li>transmissions that may be necessary for the Application to function;</li>
+    <li>any legal obligations to which the Operator may be subject.</li>
+  </ul>
+
+  <h2>7. Storage and security</h2>
+  <p>Your data is stored on the server operated by the Operator.</p>
+  <p>The Operator implements reasonable measures to protect it against unauthorized access, loss, destruction, or alteration.</p>
+  <p>As no computer system is infallible, absolute security cannot be guaranteed.</p>
+
+  <h2>8. Retention period</h2>
+  <ul>
+    <li><strong>Files, preferences, and account data</strong>: retained for as long as you use the Application or until deleted by you or by the Operator.</li>
+    <li><strong>Technical logs</strong>: retained for the period defined by the Operator, then deleted or anonymized.</li>
+  </ul>
+
+  <h2>9. Your rights</h2>
+  <p>If the GDPR applies, you have, among others, the rights of access, rectification, erasure, restriction of processing, objection, and, where applicable, data portability.</p>
+  <p>To exercise your rights or obtain information about the processing of your data, contact the Operator at the address indicated in Section 12.</p>
+  <p>You may also lodge a complaint with the competent supervisory authority in your country.</p>
+
+  <h2>10. Minors</h2>
+  <p>The Application is not intended for children under the age of digital consent applicable in your jurisdiction.</p>
+  <p>The Operator does not knowingly collect data relating to minors under this age.</p>
+
+  <h2>11. Changes</h2>
+  <p>This policy may be updated at any time.</p>
+  <p>The date of the last update appears at the top of this document.</p>
+
+  <h2>12. Contact</h2>
+  <p>For any question relating to the processing of your data or to exercise your rights, contact the Operator.</p>
+  {% endif %}
+
+  <div class="legal-page-signin-link">
+    <a class="btn-primary" href="{{ url_for('auth.signin') }}">{{ t('legal_back_to_signin') }}</a>
+  </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends "admin/layout.html" %}
+{% block title %}{{ t('admin_users_title') }}{% endblock %}
+{% block content_class %}admin-content-wide{% endblock %}
+{% block content %}
+<h1>{{ t('admin_users_title') }}</h1>
+
+<div class="admin-table-wrap">
+  <table class="admin-table">
+    <thead>
+      <tr>
+        {% for field, label_key in [
+          ('FullName', 'admin_col_name'),
+          ('Email', 'admin_col_email'),
+          ('IsActive', 'admin_col_status'),
+          ('LockedUntil', 'admin_col_locked'),
+          ('FirstLogin', 'admin_col_first_login'),
+          ('LastLogin', 'admin_col_last_login'),
+        ] %}
+          <th>
+            <a class="admin-sort-link" href="{{ url_for('admin.users', sort_field=field, sort_dir=('desc' if sort_field == field and sort_dir == 'asc' else 'asc')) }}">
+              {{ t(label_key) }}
+              {% if sort_field == field %}
+                {{ icon('chevron-down', 'admin-sort-icon admin-sort-icon-active' ~ (' admin-sort-asc' if sort_dir == 'asc' else '')) }}
+              {% else %}
+                {{ icon('arrow-up-down', 'admin-sort-icon') }}
+              {% endif %}
+            </a>
+          </th>
+        {% endfor %}
+        <th>{{ t('admin_col_actions') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+        <tr>
+          <td>{{ u.FullName }}</td>
+          <td>{{ u.Email }}</td>
+          <td>{{ t('admin_status_active') if u.IsActive else t('admin_status_disabled') }}</td>
+          <td>{{ t('common_yes') if u.is_locked() else t('common_no') }}</td>
+          <td>{{ t('common_yes') if u.FirstLogin else t('common_no') }}</td>
+          <td>{{ u.LastLogin.strftime('%d/%m/%Y %H:%M') if u.LastLogin else t('admin_never') }}</td>
+          <td class="admin-table-actions">
+            <a href="{{ url_for('admin.edit_user', users_id=u.UsersId) }}" class="btn-link">{{ t('common_edit') }}</a>
+            <form method="post" action="{{ url_for('admin.trigger_reset', users_id=u.UsersId) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn-link">{{ t('admin_reset_password') }}</button>
+            </form>
+            <form method="post" action="{{ url_for('admin.toggle_active', users_id=u.UsersId) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn-link">{{ t('admin_deactivate') if u.IsActive else t('admin_activate') }}</button>
+            </form>
+            <button type="button" class="btn-link btn-link-danger" onclick="tunoovaOpenDeleteUserModal('{{ url_for('admin.delete_user', users_id=u.UsersId) }}', '{{ u.Email }}')">{{ t('common_delete') }}</button>
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="7" class="empty-state">{{ t('admin_users_empty') }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<h2>{{ t('admin_create_account_heading') }}</h2>
+<form method="post" action="{{ url_for('admin.create_user') }}" class="admin-create-form">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="email" name="email" placeholder="{{ t('admin_col_email') }}" required>
+  <input type="text" name="fullname" placeholder="{{ t('admin_fullname_placeholder') }}" required>
+  <button type="submit" class="btn-primary">{{ t('admin_create_invite_btn') }}</button>
+</form>
+
+<dialog id="delete-user-modal" class="app-modal">
+  <div class="app-modal-header">
+    <h2 class="text-error">{{ t('common_delete') }}</h2>
+    <button type="button" class="app-modal-close" onclick="this.closest('dialog').close()" aria-label="{{ t('common_back') }}">{{ icon('x') }}</button>
+  </div>
+  <div class="app-modal-body">
+    <p>{{ t('admin_delete_user_confirm') }}</p>
+    <p id="delete-user-target" class="admin-delete-user-target"></p>
+    <form method="post" id="delete-user-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" onclick="this.closest('dialog').close()">{{ t('common_cancel') }}</button>
+        <button type="submit" class="btn-primary btn-danger">{{ t('common_delete') }}</button>
+      </div>
+    </form>
+  </div>
+</dialog>
+
+<script>
+function tunoovaOpenDeleteUserModal(actionUrl, email) {
+  var modal = document.getElementById('delete-user-modal');
+  var form = document.getElementById('delete-user-form');
+  var target = document.getElementById('delete-user-target');
+  form.action = actionUrl;
+  target.textContent = email;
+  modal.showModal();
+}
+</script>
+{% endblock %}

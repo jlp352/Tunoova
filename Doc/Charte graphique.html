@@ -1,0 +1,1511 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Charte Graphique — Tunoova</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ─── DESIGN SYSTEM TOKENS ─────────────────────────────────── */
+:root {
+    /* Marque */
+    --violet:       #5C4B87;
+    --violet-dark:  #453868;
+    --violet-mid:   #7A64B8;
+    --violet-light: #9C8AD6;
+    --lavande:      #EDE9F5;
+    --creme:        #F5E9D3;
+
+    /* Couleurs des anneaux du logo / mèches de la mascotte */
+    --orange: #E8632A;
+    --orange-dark: #C9501C;   /* survol CTA, bouton orange < 19px (contraste AA) */
+    --jaune:  #F2B33D;
+    --vert:   #3E9B5C;
+    --bleu:   #2D6E9E;
+
+    /* Surfaces & texte (thème clair) */
+    --bg:         #FAFAFC;
+    --surface:    #FFFFFF;
+    --text:       #1F1B2E;
+    --text-muted: #6B6478;
+    --border:     #E5E1EC;
+
+    /* Thème sombre */
+    --dk-bg:      #17151F;
+    --dk-surface: #211E2C;
+    --dk-text:    #F0EEF7;
+    --dk-muted:   #A79FB8;
+    --dk-border:  #3A3548;
+    --dk-violet:  #8A7CC4;
+
+    /* doc-only */
+    --doc-code-bg: #1F1B2E;
+}
+
+/* ─── RESET & BASE ──────────────────────────────────────────── */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+code { font-family: 'Fira Code', monospace; font-size: 0.85em; color: var(--violet); background: var(--lavande); padding: 0.1em 0.4em; border-radius: 4px; }
+
+/* ─── SIDEBAR ───────────────────────────────────────────────── */
+.sidebar {
+    width: 260px;
+    min-height: 100vh;
+    background: var(--violet);
+    position: fixed;
+    top: 0; left: 0;
+    overflow-y: auto;
+    z-index: 100;
+    padding: 1.75rem 0 4rem;
+}
+
+.sidebar-logo {
+    display: block;
+    padding: 0 1.5rem 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+}
+.sidebar-logo img { width: 100%; display: block; }
+
+.sidebar-label {
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: rgba(245,233,211,0.55);
+    padding: 1.5rem 1.5rem 0.5rem;
+}
+
+.sidebar nav a {
+    display: block;
+    padding: 0.5rem 1.5rem;
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    border-left: 3px solid transparent;
+}
+
+.sidebar nav a:hover {
+    color: #fff;
+    border-left-color: var(--jaune);
+    background: rgba(255,255,255,0.08);
+}
+
+/* ─── MAIN CONTENT ──────────────────────────────────────────── */
+.main {
+    margin-left: 260px;
+    flex: 1;
+    padding: 3rem 3rem 6rem;
+    max-width: 1000px;
+}
+
+/* ─── PAGE HEADER ───────────────────────────────────────────── */
+.page-header {
+    margin-bottom: 4rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.page-header h1 {
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 700;
+    font-size: 3.2rem;
+    color: var(--violet);
+    line-height: 1.05;
+}
+
+.page-header p {
+    color: var(--text-muted);
+    margin-top: 0.75rem;
+    font-size: 1rem;
+}
+
+.rainbow-bar {
+    height: 6px;
+    width: 160px;
+    border-radius: 999px;
+    margin-top: 1.25rem;
+    background: linear-gradient(90deg, var(--orange), var(--jaune), var(--vert), var(--bleu));
+}
+
+/* ─── SECTIONS ──────────────────────────────────────────────── */
+.section { margin-bottom: 5rem; }
+
+.section-heading {
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 600;
+    font-size: 2rem;
+    color: var(--text);
+    margin-bottom: 0.4rem;
+    padding-top: 1rem;
+}
+
+.section-heading::after {
+    content: '';
+    display: block;
+    width: 56px;
+    height: 4px;
+    background: linear-gradient(90deg, var(--orange), var(--jaune), var(--vert), var(--bleu));
+    margin-top: 0.5rem;
+    border-radius: 999px;
+}
+
+.section-desc {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin: 1rem 0 2rem;
+    line-height: 1.65;
+}
+
+.sub-heading {
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 600;
+    font-size: 1.2rem;
+    margin: 2.5rem 0 1rem;
+}
+
+/* ─── SPECIMEN BLOCK ────────────────────────────────────────── */
+.specimen {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.specimen-label {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text-muted);
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.specimen-preview {
+    padding: 2.5rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    background: var(--bg);
+}
+
+.specimen-preview.centered { justify-content: center; }
+.specimen-preview.violet-bg { background: var(--violet); }
+.specimen-preview.dark-bg   { background: var(--dk-bg); }
+
+.specimen-code {
+    background: var(--doc-code-bg);
+    padding: 1.25rem 1.5rem;
+    overflow-x: auto;
+}
+
+.specimen-code pre {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.78rem;
+    line-height: 1.7;
+    color: rgba(240,238,247,0.85);
+    white-space: pre;
+}
+
+/* ─── COLOR SWATCHES ────────────────────────────────────────── */
+.swatches { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem; }
+
+.swatch {
+    flex: 1;
+    min-width: 130px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--surface);
+}
+
+.swatch-color { height: 80px; }
+.swatch-info  { padding: 0.75rem 1rem; }
+.swatch-name  { font-weight: 800; font-size: 0.85rem; }
+.swatch-hex   { font-family: 'Fira Code', monospace; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem; }
+.swatch-var   { font-family: 'Fira Code', monospace; font-size: 0.7rem; color: var(--violet-light); }
+.swatch-use   { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.35rem; line-height: 1.4; }
+
+.gradient-strip { height: 60px; border-radius: 12px; margin-bottom: 0.75rem; }
+.gradient-label { font-family: 'Fira Code', monospace; font-size: 0.72rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+
+/* ─── TABLE ─────────────────────────────────────────────────── */
+.doc-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin-bottom: 1.5rem; background: var(--surface); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+.doc-table th { background: var(--violet); color: #fff; text-align: left; padding: 0.6rem 1rem; font-weight: 700; }
+.doc-table td { padding: 0.6rem 1rem; border-top: 1px solid var(--border); }
+.doc-table .dot { display: inline-block; width: 14px; height: 14px; border-radius: 50%; vertical-align: middle; margin-right: 0.5rem; border: 1px solid rgba(0,0,0,0.08); }
+
+/* ─── RADIUS / SHADOW DEMO ──────────────────────────────────── */
+.radius-box {
+    background: var(--lavande);
+    border: 2px solid var(--violet);
+    display: flex; align-items: center; justify-content: center;
+}
+.radius-box span { font-size: 0.65rem; color: var(--violet-dark); font-family: 'Fira Code', monospace; }
+.demo-col { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+.demo-col > span { font-size: 0.72rem; color: var(--text-muted); }
+
+.shadow-box {
+    background: var(--surface);
+    border-radius: 16px;
+    width: 150px; height: 84px;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 0.35rem;
+}
+.shadow-box b { font-family: 'Fredoka', sans-serif; font-weight: 600; color: var(--violet); }
+.shadow-box span { font-size: 0.65rem; color: var(--text-muted); font-family: 'Fira Code', monospace; text-align: center; }
+
+/* ─── DESIGN SYSTEM COMPONENTS ─────────────────────────────── */
+
+/* Anneau signature (les "oo" du logo) */
+.ds-ring {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: radial-gradient(circle closest-side,
+        var(--violet) 0 28%, var(--jaune) 28% 52%, var(--violet) 52% 62%, var(--orange) 62% 100%);
+    flex-shrink: 0;
+}
+.ds-ring.cool {
+    background: radial-gradient(circle closest-side,
+        var(--violet) 0 28%, var(--bleu) 28% 52%, var(--violet) 52% 62%, var(--vert) 62% 100%);
+}
+.ds-ring.spin { animation: spin 12s linear infinite; }
+
+/* Logo */
+.ds-wordmark { height: 64px; display: block; }
+
+/* Nav */
+.ds-nav {
+    width: 100%;
+    background: var(--violet);
+    padding: 1rem 1.5rem;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(92,75,135,0.25);
+}
+.ds-nav-inner { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+.ds-nav-inner img { height: 34px; display: block; }
+.ds-nav ul { display: flex; list-style: none; gap: 1.75rem; align-items: center; flex-wrap: wrap; }
+.ds-nav a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.95rem;
+    position: relative;
+    transition: color 0.25s;
+}
+.ds-nav a::after {
+    content: '';
+    position: absolute;
+    bottom: -6px; left: 0;
+    width: 0; height: 3px;
+    border-radius: 999px;
+    background: var(--jaune);
+    transition: width 0.25s;
+}
+.ds-nav a:hover { color: var(--creme); }
+.ds-nav a:hover::after { width: 100%; }
+
+/* Bouton primaire */
+.ds-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.95rem 2.2rem;
+    background: var(--orange);
+    color: #fff;
+    text-decoration: none;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 1.05rem;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.25s;
+    box-shadow: 0 8px 22px rgba(232,99,42,0.35);
+}
+.ds-cta:hover { background: #C9501C; transform: translateY(-2px); box-shadow: 0 12px 28px rgba(232,99,42,0.45); }
+
+/* Bouton violet */
+.ds-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.8rem;
+    background: var(--violet);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.95rem;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.25s;
+}
+.ds-btn:hover { background: var(--violet-dark); transform: translateY(-2px); }
+
+/* Bouton secondaire (outline) */
+.ds-outline {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.8rem;
+    background: transparent;
+    color: var(--violet);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.95rem;
+    border: 2px solid var(--violet);
+    border-radius: 999px;
+    transition: all 0.25s;
+    cursor: pointer;
+}
+.ds-outline:hover { background: var(--violet); color: #fff; }
+
+/* Bouton crème (sur fond violet) */
+.ds-btn-creme {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.8rem 1.8rem;
+    background: var(--creme);
+    color: var(--violet-dark);
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 0.95rem;
+    border-radius: 999px;
+    transition: all 0.25s;
+}
+.ds-btn-creme:hover { background: #fff; transform: translateY(-2px); }
+
+/* Badges */
+.ds-badge {
+    display: inline-block;
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 0.78rem;
+    letter-spacing: 0.3px;
+}
+.ds-badge.violet { background: var(--lavande); color: var(--violet-dark); }
+.ds-badge.orange { background: #FCE6DC; color: #A8431A; }
+.ds-badge.jaune  { background: #FDF0D5; color: #8A5F0E; }
+.ds-badge.vert   { background: #DDEFE3; color: #276B3D; }
+.ds-badge.bleu   { background: #DCE8F2; color: #1F5079; }
+.ds-badge.plein  { background: var(--violet); color: #fff; }
+
+/* Titre de section */
+.ds-section-title {
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 600;
+    font-size: clamp(2rem, 4.5vw, 2.8rem);
+    text-align: center;
+    color: var(--text);
+    width: 100%;
+}
+.ds-section-title::after {
+    content: '';
+    display: block;
+    width: 90px; height: 5px;
+    background: linear-gradient(90deg, var(--orange), var(--jaune), var(--vert), var(--bleu));
+    margin: 0.9rem auto 0;
+    border-radius: 999px;
+}
+
+/* Card fonctionnalité */
+.ds-card {
+    background: var(--surface);
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    padding: 1.75rem;
+    width: 270px;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 4px 20px rgba(31,27,46,0.06);
+}
+.ds-card:hover {
+    transform: translateY(-6px);
+    border-color: var(--violet-light);
+    box-shadow: 0 16px 40px rgba(92,75,135,0.18);
+}
+.ds-card-icon {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem;
+    margin-bottom: 1.1rem;
+}
+.ds-card-title { font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 1.35rem; margin-bottom: 0.5rem; }
+.ds-card-text  { color: var(--text-muted); font-size: 0.93rem; line-height: 1.6; }
+
+/* Card tarif */
+.ds-price {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 20px;
+    padding: 2rem 1.75rem;
+    width: 270px;
+    text-align: center;
+}
+.ds-price.featured { border-color: var(--violet); box-shadow: 0 16px 40px rgba(92,75,135,0.18); }
+.ds-price-name  { font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 1.3rem; }
+.ds-price-value { font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: 2.8rem; color: var(--violet); margin: 0.5rem 0 0.25rem; }
+.ds-price-value small { font-size: 1rem; color: var(--text-muted); font-weight: 500; }
+.ds-price ul { list-style: none; text-align: left; margin: 1.25rem 0 1.5rem; font-size: 0.92rem; }
+.ds-price li { padding: 0.35rem 0; color: var(--text); }
+.ds-price li::before { content: '✓'; color: var(--vert); font-weight: 800; margin-right: 0.6rem; }
+
+/* Input */
+.ds-input {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.95rem;
+    padding: 0.75rem 1rem;
+    width: 300px;
+    outline: none;
+    transition: all 0.2s;
+}
+.ds-input::placeholder { color: #A79FB8; }
+.ds-input:focus { border-color: var(--violet); box-shadow: 0 0 0 4px rgba(92,75,135,0.15); }
+
+/* Hero */
+.ds-hero {
+    width: 100%;
+    padding: 3rem 2.5rem;
+    background: var(--violet);
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+.ds-hero-content { position: relative; z-index: 1; flex: 1; min-width: 260px; }
+.ds-hero h1 {
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 700;
+    font-size: clamp(2.2rem, 5vw, 3.4rem);
+    line-height: 1.05;
+    color: var(--creme);
+    margin-bottom: 1rem;
+    animation: slideUp 0.8s ease-out;
+}
+.ds-hero h1 em { font-style: normal; color: var(--jaune); }
+.ds-hero p {
+    font-size: 1.1rem;
+    color: rgba(255,255,255,0.85);
+    line-height: 1.65;
+    max-width: 460px;
+    margin-bottom: 2rem;
+}
+.ds-hero-visual { position: relative; z-index: 1; width: 220px; border-radius: 24px; display: block; box-shadow: 0 20px 50px rgba(0,0,0,0.25); }
+.ds-hero .deco { position: absolute; opacity: 0.12; }
+
+/* Footer */
+.ds-footer {
+    width: 100%;
+    padding: 1.5rem 2rem;
+    background: var(--violet-dark);
+    text-align: center;
+    border-radius: 16px;
+}
+.ds-footer p { color: rgba(245,233,211,0.75); font-size: 0.9rem; }
+.ds-footer a { color: rgba(245,233,211,0.75); text-decoration: none; transition: color 0.2s; }
+.ds-footer a:hover { color: var(--jaune); }
+
+/* ─── ANIMATIONS ────────────────────────────────────────────── */
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-8px); }
+}
+@keyframes equalizer {
+    0%, 100% { transform: scaleY(0.3); }
+    50%      { transform: scaleY(1); }
+}
+
+.anim-grid { display: flex; gap: 1.25rem; flex-wrap: wrap; margin-bottom: 2rem; }
+.anim-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem 1rem;
+    text-align: center;
+    width: 150px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    display: flex; flex-direction: column; gap: 0.75rem; align-items: center;
+}
+.anim-box .name { font-family: 'Fira Code', monospace; font-size: 0.72rem; color: var(--violet); font-weight: 500; }
+.anim-stage { height: 64px; display: flex; align-items: center; justify-content: center; }
+
+.eq { display: flex; gap: 4px; align-items: flex-end; height: 40px; }
+.eq span { width: 7px; height: 100%; border-radius: 4px; transform-origin: bottom; animation: equalizer 1s ease-in-out infinite; }
+.eq span:nth-child(1) { background: var(--orange); animation-delay: -0.2s; }
+.eq span:nth-child(2) { background: var(--jaune);  animation-delay: -0.6s; }
+.eq span:nth-child(3) { background: var(--vert);   animation-delay: -0.4s; }
+.eq span:nth-child(4) { background: var(--bleu);   animation-delay: -0.8s; }
+
+/* ─── FULL PAGE PREVIEW ─────────────────────────────────────── */
+.page-preview-wrap { border: 1px solid var(--border); border-radius: 16px; overflow: hidden; background: var(--bg); }
+.preview-bar { background: #ECE9F2; padding: 0.6rem 1rem; display: flex; align-items: center; gap: 0.5rem; border-bottom: 1px solid var(--border); }
+.preview-dot { width: 12px; height: 12px; border-radius: 50%; }
+.preview-dot:nth-child(1) { background: #FF5F57; }
+.preview-dot:nth-child(2) { background: #FFBD2E; }
+.preview-dot:nth-child(3) { background: #28C840; }
+.preview-url { margin-left: 1rem; background: #fff; border-radius: 6px; padding: 0.25rem 1rem; font-family: 'Fira Code', monospace; font-size: 0.7rem; color: var(--text-muted); flex: 1; }
+
+/* ─── RESPONSIVE ────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; padding: 1.5rem 1rem; }
+    .ds-card, .ds-price, .ds-input { width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<!-- ╔══════════════════════════════════════════════════╗ -->
+<!-- ║                   SIDEBAR                        ║ -->
+<!-- ╚══════════════════════════════════════════════════╝ -->
+<aside class="sidebar">
+    <span class="sidebar-logo"><img src="logo/tunoova-wordmark-violet.png" alt="Tunoova"></span>
+    <span class="sidebar-label">Design System</span>
+    <nav>
+        <a href="#esprit">♪ Esprit &amp; ton</a>
+        <a href="#couleurs">● Palette</a>
+        <a href="#typographie">Aa Typographie</a>
+        <a href="#logo">◎ Logo &amp; mascotte</a>
+        <a href="#effets">✦ Ombres</a>
+        <a href="#rayons">◻ Bordures &amp; rayons</a>
+        <a href="#layout">▦ Layout</a>
+        <a href="#composants">⬡ Composants</a>
+        <a href="#sombre">☾ Mode sombre</a>
+        <a href="#animations">▶ Animations</a>
+        <a href="#apercu">⊞ Aperçu complet</a>
+        <a href="#tokens">{ } Tokens CSS</a>
+    </nav>
+</aside>
+
+<!-- ╔══════════════════════════════════════════════════╗ -->
+<!-- ║                  MAIN CONTENT                    ║ -->
+<!-- ╚══════════════════════════════════════════════════╝ -->
+<main class="main">
+
+    <header class="page-header">
+        <h1>Charte graphique</h1>
+        <p>Tunoova — référence de design pour le site commercial, cohérente avec l'application</p>
+        <div class="rainbow-bar"></div>
+    </header>
+
+    <!-- ═══════════════════════════════════════════════
+         0. ESPRIT
+    ════════════════════════════════════════════════ -->
+    <section class="section" id="esprit">
+        <h2 class="section-heading">Esprit &amp; ton</h2>
+        <p class="section-desc">
+            <strong>Univers :</strong> musique, radios et podcasts chez soi, pour toute la famille.<br>
+            <strong>Mode :</strong> clair par défaut, avec un mode sombre (comme l'application).<br>
+            <strong>Ambiance :</strong> chaleureuse, ludique, rassurante. Des formes rondes, des couleurs franches mais douces.<br>
+            <strong>Principe clé :</strong> le <strong>violet</strong> porte la marque, l'<strong>orange</strong> porte l'action, et les quatre couleurs du logo (orange, jaune, vert, bleu) servent d'accents. Elles ne servent jamais de fond pour de grandes surfaces.
+        </p>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════
+         1. PALETTE
+    ════════════════════════════════════════════════ -->
+    <section class="section" id="couleurs">
+        <h2 class="section-heading">Palette de couleurs</h2>
+        <p class="section-desc">Les couleurs viennent directement de l'application (<code>app/static/css/app.css</code>) et du logo (<code>wordmark.png</code>, mascotte). Le violet <code>#5C4B87</code> est aussi la <code>theme-color</code> de la PWA.</p>
+
+        <h3 class="sub-heading">Couleurs de marque</h3>
+        <div class="swatches">
+            <div class="swatch">
+                <div class="swatch-color" style="background:#5C4B87"></div>
+                <div class="swatch-info">
+                    <div class="swatch-name">Violet Tunoova</div>
+                    <div class="swatch-hex">#5C4B87</div>
+                    <div class="swatch-var">--violet</div>
+                    <div class="swatch-use">Fond du logo, header, nav, liens</div>
+                </div>
+            </div>
+            <div class="swatch">
+                <div class="swatch-color" style="background:#453868"></div>
+                <div class="swatch-info">
+                    <div class="swatch-name">Violet profond</div>
+                    <div class="swatch-hex">#453868</div>
+                    <div class="swatch-var">--violet-dark</div>
+                    <div class="swatch-use">Survol, footer</div>
+                </div>
+            </div>
+            <div class="swatch">
+                <div class="swatch-color" style="background:#F5E9D3"></div>
+                <div class="swatch-info">
+                    <div class="swatch-name">Crème</div>
+                    <div class="swatch-hex">#F5E9D3</div>
+                    <div class="swatch-var">--creme</div>
+                    <div class="swatch-use">Lettrage du logo, titres sur violet</div>
+                </div>
+            </div>
+            <div class="swatch">
+                <div class="swatch-color" style="background:#EDE9F5"></div>
+                <div class="swatch-info">
+                    <div class="swatch-name">Lavande</div>
+                    <div class="swatch-hex">#EDE9F5</div>
+                    <div class="swatch-var">--lavande</div>
+                    <div class="swatch-use">Fonds teintés, badges, encadrés</div>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="sub-heading">Couleurs d'accent (les anneaux du logo)</h3>
+        <div class="swatches">
+            <div class="swatch">
+                <div class="swatch-color" style="background:#E8632A"></div>
+                <div class="swatch-info">
+                    <div class="swatch-name">Orange</div>
+                    <div class="swatch-hex">#E8632A</div>
+                    <div class="swatch-var">--orange</div>
+                    <div class="swatch-use">Boutons d'action (CTA)</div>
+                </div>
+            </div>
+            <div class="swatch">
+                <div class="swatch-color" style="background:#F2B33D"></div>
+                <div class="swatch-info">
+                    <div class="swatch-name">Jaune</div>
+                    <div class="swatch-hex">#F2B33D</div>
+                    <div class="swatch-var">--jaune</div>
+                    <div class="swatch-use">Mise en valeur, mots-clés sur violet</div>
+                </div>
+            </div>
+            <div class="swatch">
+                <div class="swatch-color" style="background:#3E9B5C"></div>
+                <div class="swatch-info">
+                    <div class="swatch-name">Vert</div>
+                    <div class="swatch-hex">#3E9B5C</div>
+                    <div class="swatch-var">--vert</div>
+                    <div class="swatch-use">Validation, coches, « inclus »</div>
+                </div>
+            </div>
+            <div class="swatch">
+                <div class="swatch-color" style="background:#2D6E9E"></div>
+                <div class="swatch-info">
+                    <div class="swatch-name">Bleu</div>
+                    <div class="swatch-hex">#2D6E9E</div>
+                    <div class="swatch-var">--bleu</div>
+                    <div class="swatch-use">Info, liens secondaires, icônes</div>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="sub-heading">Neutres (thème clair)</h3>
+        <div class="swatches">
+            <div class="swatch">
+                <div class="swatch-color" style="background:#FAFAFC; border-bottom:1px solid #E5E1EC"></div>
+                <div class="swatch-info">
+                    <div class="swatch-name">Fond</div>
+                    <div class="swatch-hex">#FAFAFC</div>
+                    <div class="swatch-var">--bg</div>
+                </div>
+            </div>
+            <div class="swatch">
+                <div class="swatch-color" style="background:#FFFFFF; border-bottom:1px solid #E5E1EC"></div>
+                <div class="swatch-info">
+                    <div class="swatch-name">Surface</div>
+                    <div class="swatch-hex">#FFFFFF</div>
+                    <div class="swatch-var">--surface</div>
+                </div>
+            </div>
+            <div class="swatch">
+                <div class="swatch-color" style="background:#1F1B2E"></div>
+                <div class="swatch-info">
+                    <div class="swatch-name">Texte</div>
+                    <div class="swatch-hex">#1F1B2E</div>
+                    <div class="swatch-var">--text</div>
+                </div>
+            </div>
+            <div class="swatch">
+                <div class="swatch-color" style="background:#6B6478"></div>
+                <div class="swatch-info">
+                    <div class="swatch-name">Texte discret</div>
+                    <div class="swatch-hex">#6B6478</div>
+                    <div class="swatch-var">--text-muted</div>
+                </div>
+            </div>
+            <div class="swatch">
+                <div class="swatch-color" style="background:#E5E1EC"></div>
+                <div class="swatch-info">
+                    <div class="swatch-name">Bordure</div>
+                    <div class="swatch-hex">#E5E1EC</div>
+                    <div class="swatch-var">--border</div>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="sub-heading">Nuances de violet</h3>
+        <table class="doc-table">
+            <tr><th>Nuance</th><th>Valeur</th><th>Usage dans l'app</th></tr>
+            <tr><td><span class="dot" style="background:#453868"></span>Violet profond</td><td><code>#453868</code></td><td>Survol des boutons, texte sur lavande</td></tr>
+            <tr><td><span class="dot" style="background:#5C4B87"></span>Violet Tunoova</td><td><code>#5C4B87</code></td><td>Couleur de marque</td></tr>
+            <tr><td><span class="dot" style="background:#7A64B8"></span>Violet moyen</td><td><code>#7A64B8</code></td><td>Fin de dégradé des tuiles</td></tr>
+            <tr><td><span class="dot" style="background:#8A7CC4"></span>Violet clair</td><td><code>#8A7CC4</code></td><td>Marque en mode sombre</td></tr>
+            <tr><td><span class="dot" style="background:#9C8AD6"></span>Mauve</td><td><code>#9C8AD6</code></td><td>Badges, survol des bordures</td></tr>
+            <tr><td><span class="dot" style="background:#C9BEF0"></span>Glycine</td><td><code>#C9BEF0</code></td><td>Curseurs sur fond violet</td></tr>
+            <tr><td><span class="dot" style="background:#EDE9F5"></span>Lavande</td><td><code>#EDE9F5</code></td><td>Messages flash, lignes de groupe</td></tr>
+        </table>
+
+        <h3 class="sub-heading">Couleurs fonctionnelles</h3>
+        <table class="doc-table">
+            <tr><th>Contexte</th><th>Valeur</th></tr>
+            <tr><td><span class="dot" style="background:#3E9B5C"></span>Succès / inclus</td><td><code>#3E9B5C</code> (vert du logo)</td></tr>
+            <tr><td><span class="dot" style="background:#B3261E"></span>Erreur</td><td><code>#B3261E</code></td></tr>
+            <tr><td><span class="dot" style="background:#E3342F"></span>Pastille de notification</td><td><code>#E3342F</code></td></tr>
+            <tr><td><span class="dot" style="background:#F2B33D"></span>Avertissement</td><td><code>#F2B33D</code> (jaune du logo)</td></tr>
+            <tr><td><span class="dot" style="background:#2D6E9E"></span>Information</td><td><code>#2D6E9E</code> (bleu du logo)</td></tr>
+        </table>
+
+        <h3 class="sub-heading">Dégradés signatures</h3>
+
+        <div class="gradient-strip" style="background: linear-gradient(90deg, #E8632A, #F2B33D, #3E9B5C, #2D6E9E)"></div>
+        <div class="gradient-label">linear-gradient(90deg, #E8632A, #F2B33D, #3E9B5C, #2D6E9E) — « arc-en-ciel » des mèches de la mascotte : soulignements, barres fines</div>
+
+        <div class="gradient-strip" style="background: linear-gradient(135deg, #5C4B87, #7A64B8)"></div>
+        <div class="gradient-label">linear-gradient(135deg, #5C4B87, #7A64B8) — surfaces violettes (tuiles, bandeaux)</div>
+
+        <div class="gradient-strip" style="background: linear-gradient(135deg, #453868, #5C4B87)"></div>
+        <div class="gradient-label">linear-gradient(135deg, #453868, #5C4B87) — hero, footer</div>
+
+        <div class="specimen">
+            <div class="specimen-label">Règle d'usage de l'arc-en-ciel</div>
+            <div class="specimen-preview" style="flex-direction:column; align-items:flex-start; gap:0.75rem;">
+                <div style="font-family:'Fredoka',sans-serif; font-weight:600; font-size:2rem;">Toute votre musique, chez vous</div>
+                <div style="height:5px; width:90px; border-radius:999px; background:linear-gradient(90deg,#E8632A,#F2B33D,#3E9B5C,#2D6E9E)"></div>
+                <div style="font-size:0.85rem; color:var(--text-muted)">L'arc-en-ciel s'utilise en <strong>traits fins</strong> (soulignement, séparateur, barre de progression). On ne l'applique ni au texte ni à de grandes surfaces.</div>
+            </div>
+            <div class="specimen-code"><pre>.rainbow-line {
+    height: 5px;
+    width: 90px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #E8632A, #F2B33D, #3E9B5C, #2D6E9E);
+}</pre></div>
+        </div>
+
+        <h3 class="sub-heading">Contrastes (accessibilité)</h3>
+        <table class="doc-table">
+            <tr><th>Combinaison</th><th>Statut</th></tr>
+            <tr><td>Blanc / crème sur violet <code>#5C4B87</code></td><td>7,5 / 6,2 : 1 — ✓ tout texte</td></tr>
+            <tr><td>Texte <code>#1F1B2E</code> sur fond clair</td><td>16 : 1 — ✓ tout texte</td></tr>
+            <tr><td>Blanc sur orange <code>#E8632A</code></td><td>3,4 : 1 — ✓ texte large uniquement (gras ≥ 19px). Pour un bouton plus petit, utiliser l’orange foncé <code>#C9501C</code> (4,5 : 1)</td></tr>
+            <tr><td>Jaune sur violet</td><td>4 : 1 — ✓ titres uniquement</td></tr>
+            <tr><td>Blanc sur jaune, ou jaune sur blanc</td><td>1,9 : 1 — ✗ à éviter</td></tr>
+        </table>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════
+         2. TYPOGRAPHIE
+    ════════════════════════════════════════════════ -->
+    <section class="section" id="typographie">
+        <h2 class="section-heading">Typographie</h2>
+        <p class="section-desc">Deux polices : <strong>Fredoka</strong> pour les titres (ronde et épaisse, proche du lettrage du logo) et <strong>Nunito</strong> pour le texte (lisible, aux terminaisons arrondies). L'application, elle, utilise la police système du téléphone. Le site commercial peut se permettre une identité plus marquée.</p>
+
+        <div class="specimen">
+            <div class="specimen-label">Hiérarchie complète</div>
+            <div class="specimen-preview" style="flex-direction:column; align-items:flex-start; gap:1.5rem; padding:2rem;">
+                <div>
+                    <div style="font-family:'Fredoka',sans-serif; font-weight:700; font-size:clamp(2.4rem,6vw,3.8rem); line-height:1.05; color:var(--violet);">Votre musique,<br>votre serveur.</div>
+                    <div style="font-family:'Fira Code',monospace; font-size:0.65rem; color:var(--text-muted); margin-top:0.35rem">Fredoka 700 · clamp(2.5rem, 6vw, 4.5rem) · lh 1.05 — Hero H1</div>
+                </div>
+                <div>
+                    <div style="font-family:'Fredoka',sans-serif; font-weight:600; font-size:2.4rem;">Fonctionnalités</div>
+                    <div style="font-family:'Fira Code',monospace; font-size:0.65rem; color:var(--text-muted); margin-top:0.35rem">Fredoka 600 · clamp(2rem, 4.5vw, 2.8rem) — Titre de section</div>
+                </div>
+                <div>
+                    <div style="font-family:'Fredoka',sans-serif; font-weight:600; font-size:1.35rem;">Radios du monde entier</div>
+                    <div style="font-family:'Fira Code',monospace; font-size:0.65rem; color:var(--text-muted); margin-top:0.35rem">Fredoka 600 · 1.35rem — Titre de card</div>
+                </div>
+                <div>
+                    <div style="font-family:'Nunito',sans-serif; font-weight:700; font-size:0.95rem;">Fonctionnalités · Tarifs · Installation · Contact</div>
+                    <div style="font-family:'Fira Code',monospace; font-size:0.65rem; color:var(--text-muted); margin-top:0.35rem">Nunito 700 · 0.95rem — Navigation (pas de majuscules forcées)</div>
+                </div>
+                <div>
+                    <div style="font-family:'Nunito',sans-serif; font-size:1.1rem; line-height:1.7; max-width:520px;">Tunoova réunit votre bibliothèque MP3, les radios et les podcasts dans une seule application, installée chez vous et diffusée sur toutes vos enceintes.</div>
+                    <div style="font-family:'Fira Code',monospace; font-size:0.65rem; color:var(--text-muted); margin-top:0.35rem">Nunito 400 · 1.1rem · lh 1.7 — Corps</div>
+                </div>
+                <div>
+                    <div style="font-family:'Nunito',sans-serif; font-size:0.85rem; color:var(--text-muted);">© 2026 Tunoova — Mentions légales · Confidentialité</div>
+                    <div style="font-family:'Fira Code',monospace; font-size:0.65rem; color:var(--text-muted); margin-top:0.35rem">Nunito 400 · 0.85rem · --text-muted — Footer, mentions</div>
+                </div>
+            </div>
+            <div class="specimen-code"><pre>&lt;link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&amp;family=Nunito:wght@400;600;700;800&amp;display=swap" rel="stylesheet"&gt;
+
+h1, h2, h3, .logo-text { font-family: 'Fredoka', sans-serif; }
+body                   { font-family: 'Nunito', sans-serif; }</pre></div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════
+         3. LOGO
+    ════════════════════════════════════════════════ -->
+    <section class="section" id="logo">
+        <h2 class="section-heading">Logo &amp; mascotte</h2>
+        <p class="section-desc">Les fichiers sources sont dans <code>Doc/logo/</code> et <code>app/static/brand/</code>. Les deux « o » en forme d'anneaux (orange/jaune et vert/bleu) sont le motif signature : on peut les reprendre seuls comme élément décoratif.</p>
+
+        <div class="specimen">
+            <div class="specimen-label">Wordmark — sur fond violet (version principale)</div>
+            <div class="specimen-preview violet-bg centered">
+                <img class="ds-wordmark" src="logo/tunoova-wordmark-violet.png" alt="Tunoova">
+            </div>
+        </div>
+        <div class="specimen">
+            <div class="specimen-label">Wordmark — fond transparent</div>
+            <div class="specimen-preview centered" style="background:var(--violet-dark)">
+                <img class="ds-wordmark" src="logo/tunoova-wordmark-transparent.png" alt="Tunoova">
+            </div>
+        </div>
+
+        <div class="specimen">
+            <div class="specimen-label">Mascotte &amp; icône d'application</div>
+            <div class="specimen-preview centered" style="gap:2rem;">
+                <img src="../app/static/brand/app-icon-512.png" alt="Icône Tunoova" style="width:140px; border-radius:28px; box-shadow:0 12px 30px rgba(92,75,135,0.25)">
+                <img src="../app/static/brand/logo-badge.png" alt="Badge Tunoova" style="width:140px; border-radius:28px">
+            </div>
+        </div>
+
+        <div class="specimen">
+            <div class="specimen-label">Anneaux signature — en CSS pur</div>
+            <div class="specimen-preview centered" style="gap:1rem;">
+                <div class="ds-ring"></div>
+                <div class="ds-ring cool"></div>
+                <div class="ds-ring" style="width:40px;height:40px"></div>
+                <div class="ds-ring cool" style="width:40px;height:40px"></div>
+            </div>
+            <div class="specimen-code"><pre>.ring {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: radial-gradient(circle closest-side,
+        #5C4B87 0 28%, #F2B33D 28% 52%, #5C4B87 52% 62%, #E8632A 62% 100%);
+}
+.ring.cool {   /* second "o" du logo */
+    background: radial-gradient(circle closest-side,
+        #5C4B87 0 28%, #2D6E9E 28% 52%, #5C4B87 52% 62%, #3E9B5C 62% 100%);
+}</pre></div>
+        </div>
+
+        <table class="doc-table">
+            <tr><th>À faire</th><th>À éviter</th></tr>
+            <tr><td>Wordmark crème sur violet <code>#5C4B87</code></td><td>Wordmark sur fond clair sans son cartouche violet</td></tr>
+            <tr><td>Marge libre autour du logo ≥ hauteur d'un « o »</td><td>Déformer, recolorer ou ajouter une ombre portée</td></tr>
+            <tr><td>Hauteur minimale de 24px à l'écran</td><td>Mettre le logo sur une photo chargée</td></tr>
+        </table>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════
+         4. OMBRES
+    ════════════════════════════════════════════════ -->
+    <section class="section" id="effets">
+        <h2 class="section-heading">Ombres</h2>
+        <p class="section-desc">Les ombres sont douces et légèrement teintées de violet, sans effet néon. Seul le bouton d'action a une ombre orange.</p>
+
+        <div class="specimen">
+            <div class="specimen-label">Niveaux d'élévation</div>
+            <div class="specimen-preview" style="gap:2.5rem; padding:3rem 2rem;">
+                <div class="shadow-box" style="box-shadow: 0 4px 20px rgba(31,27,46,0.06)"><b>Card</b><span>repos</span></div>
+                <div class="shadow-box" style="box-shadow: 0 16px 40px rgba(92,75,135,0.18)"><b>Card</b><span>survol / mise en avant</span></div>
+                <div class="shadow-box" style="box-shadow: 0 10px 30px rgba(92,75,135,0.25)"><b>Header</b><span>sticky</span></div>
+                <div class="shadow-box" style="box-shadow: 0 8px 22px rgba(232,99,42,0.35)"><b style="color:var(--orange)">CTA</b><span>bouton orange</span></div>
+                <div class="shadow-box" style="box-shadow: 0 8px 30px rgba(0,0,0,0.25)"><b>Modale</b><span>dialogue</span></div>
+            </div>
+            <div class="specimen-code"><pre>/* Card repos */      box-shadow: 0 4px 20px rgba(31, 27, 46, 0.06);
+/* Card survol */     box-shadow: 0 16px 40px rgba(92, 75, 135, 0.18);
+/* Header sticky */   box-shadow: 0 10px 30px rgba(92, 75, 135, 0.25);
+/* Bouton CTA */      box-shadow: 0 8px 22px rgba(232, 99, 42, 0.35);
+/* CTA survol */      box-shadow: 0 12px 28px rgba(232, 99, 42, 0.45);
+/* Modale */          box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+/* Focus input */     box-shadow: 0 0 0 4px rgba(92, 75, 135, 0.15);</pre></div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════
+         5. BORDURES & RAYONS
+    ════════════════════════════════════════════════ -->
+    <section class="section" id="rayons">
+        <h2 class="section-heading">Bordures &amp; rayons</h2>
+        <p class="section-desc">Tout est arrondi, comme le logo. Les boutons et badges sont en forme de pilule (<code>999px</code>).</p>
+
+        <div class="specimen">
+            <div class="specimen-label">Échelle de rayons</div>
+            <div class="specimen-preview" style="gap:2rem; align-items:flex-end; padding:2.5rem 2rem;">
+                <div class="demo-col"><div class="radius-box" style="border-radius:8px; width:60px;height:60px;"><span>8px</span></div><span>input app, vignette</span></div>
+                <div class="demo-col"><div class="radius-box" style="border-radius:12px; width:70px;height:70px;"><span>12px</span></div><span>input, petite card</span></div>
+                <div class="demo-col"><div class="radius-box" style="border-radius:16px; width:80px;height:80px;"><span>16px</span></div><span>bloc, pochette</span></div>
+                <div class="demo-col"><div class="radius-box" style="border-radius:20px; width:90px;height:90px;"><span>20px</span></div><span>card, hero</span></div>
+                <div class="demo-col"><div class="radius-box" style="border-radius:999px; width:130px;height:50px;"><span>999px</span></div><span>bouton, badge</span></div>
+            </div>
+            <div class="specimen-code"><pre>--radius-sm:   8px;
+--radius-md:   12px;
+--radius-lg:   16px;
+--radius-xl:   20px;
+--radius-pill: 999px;
+
+/* Bordures */
+border: 1px solid #E5E1EC;   /* séparation, card au repos */
+border: 2px solid #5C4B87;   /* élément actif, focus, bouton outline */</pre></div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════
+         6. LAYOUT
+    ════════════════════════════════════════════════ -->
+    <section class="section" id="layout">
+        <h2 class="section-heading">Layout &amp; espacements</h2>
+        <div class="specimen">
+            <div class="specimen-label">Grille de cards</div>
+            <div class="specimen-preview" style="flex-direction:column; align-items:stretch; padding:1.5rem;">
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:1rem; width:100%">
+                    <div style="background:var(--surface);border-radius:12px;padding:1rem;border:1px dashed var(--violet-light);font-family:'Fira Code',monospace;font-size:0.7rem;color:var(--text-muted);text-align:center">card</div>
+                    <div style="background:var(--surface);border-radius:12px;padding:1rem;border:1px dashed var(--violet-light);font-family:'Fira Code',monospace;font-size:0.7rem;color:var(--text-muted);text-align:center">card</div>
+                    <div style="background:var(--surface);border-radius:12px;padding:1rem;border:1px dashed var(--violet-light);font-family:'Fira Code',monospace;font-size:0.7rem;color:var(--text-muted);text-align:center">card</div>
+                </div>
+            </div>
+            <div class="specimen-code"><pre>max-width: 1200px;          /* largeur max du contenu */
+padding:   5rem 1.5rem;     /* sections (3rem sur mobile) */
+gap:       1.5rem;          /* entre les cards */
+
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+
+/* Espacements : multiples de 4px (4, 8, 12, 16, 24, 32, 48, 80) */</pre></div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════
+         7. COMPOSANTS
+    ════════════════════════════════════════════════ -->
+    <section class="section" id="composants">
+        <h2 class="section-heading">Composants</h2>
+
+        <!-- NAVIGATION -->
+        <div class="specimen">
+            <div class="specimen-label">Navigation</div>
+            <div class="specimen-preview" style="padding:1.5rem;">
+                <nav class="ds-nav">
+                    <div class="ds-nav-inner">
+                        <img src="logo/tunoova-wordmark-violet.png" alt="Tunoova">
+                        <ul>
+                            <li><a href="#">Fonctionnalités</a></li>
+                            <li><a href="#">Tarifs</a></li>
+                            <li><a href="#">Installation</a></li>
+                            <li><a href="#">Contact</a></li>
+                        </ul>
+                        <a href="#" class="ds-btn-creme" style="padding:0.55rem 1.3rem; font-size:0.85rem;">Essayer</a>
+                    </div>
+                </nav>
+            </div>
+            <div class="specimen-code"><pre>header {
+    background: #5C4B87;
+    box-shadow: 0 10px 30px rgba(92, 75, 135, 0.25);
+    padding: 1rem 1.5rem;
+}
+nav a { color: #fff; font-weight: 700; font-size: 0.95rem; }
+nav a::after { /* soulignement animé */ height: 3px; border-radius: 999px; background: #F2B33D; transition: width 0.25s; }
+nav a:hover { color: #F5E9D3; }
+nav a:hover::after { width: 100%; }</pre></div>
+        </div>
+
+        <!-- HERO -->
+        <div class="specimen">
+            <div class="specimen-label">Section hero</div>
+            <div class="specimen-preview" style="padding:1.5rem;">
+                <div class="ds-hero">
+                    <div class="ds-ring deco" style="width:260px;height:260px;right:-60px;top:-80px;"></div>
+                    <div class="ds-ring cool deco" style="width:180px;height:180px;left:-50px;bottom:-70px;"></div>
+                    <div class="ds-hero-content">
+                        <h1>Votre musique,<br><em>votre serveur.</em></h1>
+                        <p>MP3, radios et podcasts réunis dans une seule application, installée chez vous et diffusée sur toutes vos enceintes.</p>
+                        <a href="#" class="ds-cta">Découvrir Tunoova</a>
+                    </div>
+                    <img class="ds-hero-visual" src="../app/static/brand/app-icon-512.png" alt="">
+                </div>
+            </div>
+            <div class="specimen-code"><pre>.hero {
+    background: #5C4B87;
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+}
+.hero h1 {
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 700;
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    line-height: 1.05;
+    color: #F5E9D3;
+    animation: slideUp 0.8s ease-out;
+}
+.hero h1 em { font-style: normal; color: #F2B33D; }
+.hero .deco { position: absolute; opacity: 0.12; }  /* anneaux géants en fond */</pre></div>
+        </div>
+
+        <!-- BOUTONS -->
+        <div class="specimen">
+            <div class="specimen-label">Boutons</div>
+            <div class="specimen-preview" style="gap:1rem;">
+                <a href="#" class="ds-cta">Télécharger</a>
+                <a href="#" class="ds-btn">Voir la démo</a>
+                <a href="#" class="ds-outline">En savoir plus</a>
+            </div>
+            <div class="specimen-preview violet-bg" style="gap:1rem; padding-top:1.5rem; padding-bottom:1.5rem;">
+                <a href="#" class="ds-cta">Télécharger</a>
+                <a href="#" class="ds-btn-creme">Voir la démo</a>
+            </div>
+            <div class="specimen-code"><pre>/* Action principale — orange, une seule par écran */
+.btn-cta {
+    background: #E8632A;
+    color: #fff;
+    border-radius: 999px;
+    padding: 0.95rem 2.2rem;
+    font-weight: 800;
+    box-shadow: 0 8px 22px rgba(232, 99, 42, 0.35);
+    transition: all 0.25s;
+}
+.btn-cta:hover { background: #C9501C; transform: translateY(-2px); }
+
+/* Action secondaire — violet plein */
+.btn-primary { background: #5C4B87; color: #fff; border-radius: 999px; padding: 0.8rem 1.8rem; font-weight: 700; }
+.btn-primary:hover { background: #453868; }
+
+/* Tertiaire — contour */
+.btn-outline { background: transparent; color: #5C4B87; border: 2px solid #5C4B87; border-radius: 999px; }
+.btn-outline:hover { background: #5C4B87; color: #fff; }
+
+/* Sur fond violet — crème */
+.btn-creme { background: #F5E9D3; color: #453868; border-radius: 999px; font-weight: 800; }</pre></div>
+        </div>
+
+        <!-- BADGES -->
+        <div class="specimen">
+            <div class="specimen-label">Badges &amp; étiquettes</div>
+            <div class="specimen-preview" style="gap:0.75rem;">
+                <span class="ds-badge plein">Nouveau</span>
+                <span class="ds-badge violet">Auto-hébergé</span>
+                <span class="ds-badge orange">Populaire</span>
+                <span class="ds-badge jaune">Bêta</span>
+                <span class="ds-badge vert">Inclus</span>
+                <span class="ds-badge bleu">DLNA</span>
+            </div>
+            <div class="specimen-code"><pre>.badge { display: inline-block; padding: 0.35rem 0.9rem; border-radius: 999px; font-weight: 800; font-size: 0.78rem; }
+
+/* Version teintée : fond pâle + texte foncé de la même famille */
+.badge-violet { background: #EDE9F5; color: #453868; }
+.badge-orange { background: #FCE6DC; color: #A8431A; }
+.badge-jaune  { background: #FDF0D5; color: #8A5F0E; }
+.badge-vert   { background: #DDEFE3; color: #276B3D; }
+.badge-bleu   { background: #DCE8F2; color: #1F5079; }
+.badge-plein  { background: #5C4B87; color: #fff; }</pre></div>
+        </div>
+
+        <!-- SECTION TITLE -->
+        <div class="specimen">
+            <div class="specimen-label">Titre de section</div>
+            <div class="specimen-preview centered">
+                <h2 class="ds-section-title">Tout ce qu'il vous faut</h2>
+            </div>
+            <div class="specimen-code"><pre>.section-title {
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 600;
+    font-size: clamp(2rem, 4.5vw, 2.8rem);
+    text-align: center;
+}
+.section-title::after {
+    content: '';
+    display: block;
+    width: 90px; height: 5px;
+    background: linear-gradient(90deg, #E8632A, #F2B33D, #3E9B5C, #2D6E9E);
+    margin: 0.9rem auto 0;
+    border-radius: 999px;
+}</pre></div>
+        </div>
+
+        <!-- CARD -->
+        <div class="specimen">
+            <div class="specimen-label">Card fonctionnalité — survolez la carte</div>
+            <div class="specimen-preview centered" style="padding:3rem 2rem; gap:1.5rem;">
+                <div class="ds-card">
+                    <div class="ds-card-icon" style="background:#FCE6DC">🎵</div>
+                    <h3 class="ds-card-title">Votre bibliothèque</h3>
+                    <p class="ds-card-text">Tous vos MP3, classés par artiste et album, avec leurs pochettes.</p>
+                </div>
+                <div class="ds-card">
+                    <div class="ds-card-icon" style="background:#DDEFE3">📻</div>
+                    <h3 class="ds-card-title">Radios</h3>
+                    <p class="ds-card-text">Des milliers de stations du monde entier, en un clic.</p>
+                </div>
+                <div class="ds-card">
+                    <div class="ds-card-icon" style="background:#DCE8F2">🔊</div>
+                    <h3 class="ds-card-title">Multi-enceintes</h3>
+                    <p class="ds-card-text">Diffusez sur vos enceintes DLNA et SoundTouch depuis le téléphone.</p>
+                </div>
+            </div>
+            <div class="specimen-code"><pre>.card {
+    background: #FFFFFF;
+    border: 1px solid #E5E1EC;
+    border-radius: 20px;
+    padding: 1.75rem;
+    box-shadow: 0 4px 20px rgba(31, 27, 46, 0.06);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.card:hover {
+    transform: translateY(-6px);
+    border-color: #9C8AD6;
+    box-shadow: 0 16px 40px rgba(92, 75, 135, 0.18);
+}
+/* Pastille d'icône : fond pâle d'une couleur d'accent (orange, vert, bleu, jaune) */
+.card-icon { width: 52px; height: 52px; border-radius: 14px; background: #FCE6DC; }</pre></div>
+        </div>
+
+        <!-- PRICING -->
+        <div class="specimen">
+            <div class="specimen-label">Card tarif (contenu fictif, exemple de mise en forme)</div>
+            <div class="specimen-preview centered" style="padding:3rem 2rem; gap:1.5rem; align-items:stretch;">
+                <div class="ds-price">
+                    <div class="ds-price-name">Découverte</div>
+                    <div class="ds-price-value">0 € <small>/ mois</small></div>
+                    <ul><li>Bibliothèque MP3</li><li>Radios</li><li>1 utilisateur</li></ul>
+                    <a href="#" class="ds-outline">Commencer</a>
+                </div>
+                <div class="ds-price featured">
+                    <span class="ds-badge orange">Populaire</span>
+                    <div class="ds-price-name" style="margin-top:0.5rem">Famille</div>
+                    <div class="ds-price-value">X € <small>/ mois</small></div>
+                    <ul><li>Tout Découverte</li><li>Podcasts</li><li>Multi-enceintes</li><li>Jusqu'à 6 profils</li></ul>
+                    <a href="#" class="ds-cta">Choisir</a>
+                </div>
+            </div>
+            <div class="specimen-code"><pre>.price-card          { border: 2px solid #E5E1EC; border-radius: 20px; padding: 2rem 1.75rem; text-align: center; }
+.price-card.featured { border-color: #5C4B87; box-shadow: 0 16px 40px rgba(92, 75, 135, 0.18); }
+.price-value         { font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: 2.8rem; color: #5C4B87; }
+.price-card li::before { content: '✓'; color: #3E9B5C; font-weight: 800; }</pre></div>
+        </div>
+
+        <!-- INPUT -->
+        <div class="specimen">
+            <div class="specimen-label">Champ de saisie</div>
+            <div class="specimen-preview centered" style="gap:1rem;">
+                <input type="email" class="ds-input" placeholder="Votre adresse e-mail">
+                <a href="#" class="ds-btn">S'inscrire</a>
+            </div>
+            <div class="specimen-code"><pre>.input {
+    background: #FFFFFF;
+    border: 2px solid #E5E1EC;
+    border-radius: 12px;
+    color: #1F1B2E;
+    padding: 0.75rem 1rem;
+    font-family: 'Nunito', sans-serif;
+}
+.input::placeholder { color: #A79FB8; }
+.input:focus { border-color: #5C4B87; box-shadow: 0 0 0 4px rgba(92, 75, 135, 0.15); outline: none; }</pre></div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="specimen">
+            <div class="specimen-label">Footer</div>
+            <div class="specimen-preview" style="padding:1.5rem;">
+                <div class="ds-footer">
+                    <p>© 2026 Tunoova — <a href="#">Mentions légales</a> · <a href="#">Confidentialité</a> · <a href="#">Contact</a></p>
+                </div>
+            </div>
+            <div class="specimen-code"><pre>footer   { background: #453868; padding: 1.5rem 2rem; text-align: center; }
+footer p, footer a { color: rgba(245, 233, 211, 0.75); }
+footer a:hover     { color: #F2B33D; }</pre></div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════
+         8. MODE SOMBRE
+    ════════════════════════════════════════════════ -->
+    <section class="section" id="sombre">
+        <h2 class="section-heading">Mode sombre</h2>
+        <p class="section-desc">Ce sont les valeurs exactes de l'application (<code>html[data-theme="dark"]</code>). Le violet s'éclaircit pour rester lisible, et les couleurs d'accent ne changent pas.</p>
+
+        <div class="swatches">
+            <div class="swatch"><div class="swatch-color" style="background:#17151F"></div><div class="swatch-info"><div class="swatch-name">Fond</div><div class="swatch-hex">#17151F</div></div></div>
+            <div class="swatch"><div class="swatch-color" style="background:#211E2C"></div><div class="swatch-info"><div class="swatch-name">Surface</div><div class="swatch-hex">#211E2C</div></div></div>
+            <div class="swatch"><div class="swatch-color" style="background:#3A3548"></div><div class="swatch-info"><div class="swatch-name">Bordure</div><div class="swatch-hex">#3A3548</div></div></div>
+            <div class="swatch"><div class="swatch-color" style="background:#8A7CC4"></div><div class="swatch-info"><div class="swatch-name">Marque</div><div class="swatch-hex">#8A7CC4</div></div></div>
+            <div class="swatch"><div class="swatch-color" style="background:#A79AE0"></div><div class="swatch-info"><div class="swatch-name">Marque survol</div><div class="swatch-hex">#A79AE0</div></div></div>
+            <div class="swatch"><div class="swatch-color" style="background:#F0EEF7"></div><div class="swatch-info"><div class="swatch-name">Texte</div><div class="swatch-hex">#F0EEF7</div></div></div>
+            <div class="swatch"><div class="swatch-color" style="background:#A79FB8"></div><div class="swatch-info"><div class="swatch-name">Texte discret</div><div class="swatch-hex">#A79FB8</div></div></div>
+        </div>
+
+        <div class="specimen">
+            <div class="specimen-label">Card en mode sombre</div>
+            <div class="specimen-preview dark-bg centered" style="padding:2.5rem 2rem;">
+                <div class="ds-card" style="background:#211E2C; border-color:#3A3548; box-shadow:none;">
+                    <div class="ds-card-icon" style="background:rgba(232,99,42,0.18)">🎙️</div>
+                    <h3 class="ds-card-title" style="color:#F0EEF7">Podcasts</h3>
+                    <p class="ds-card-text" style="color:#A79FB8">Abonnez-vous, les nouveaux épisodes arrivent tout seuls.</p>
+                </div>
+                <a href="#" class="ds-cta">Télécharger</a>
+                <a href="#" class="ds-outline" style="color:#8A7CC4; border-color:#8A7CC4">En savoir plus</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════
+         9. ANIMATIONS
+    ════════════════════════════════════════════════ -->
+    <section class="section" id="animations">
+        <h2 class="section-heading">Animations</h2>
+        <p class="section-desc">Des animations légères, avec un léger rebond. Pas de boucle rapide, et tout est désactivé quand l'utilisateur demande moins de mouvement (<code>prefers-reduced-motion</code>).</p>
+
+        <div class="anim-grid">
+            <div class="anim-box">
+                <div class="anim-stage"><div class="ds-ring spin" style="width:52px;height:52px"></div></div>
+                <div class="name">spin</div>
+                <div>12s · infini<br>anneau décoratif</div>
+            </div>
+            <div class="anim-box">
+                <div class="anim-stage"><div class="eq"><span></span><span></span><span></span><span></span></div></div>
+                <div class="name">equalizer</div>
+                <div>1s · infini<br>« en lecture »</div>
+            </div>
+            <div class="anim-box">
+                <div class="anim-stage"><div style="animation:slideUp 2s ease-out infinite; font-family:'Fredoka',sans-serif; font-weight:700; font-size:1.4rem; color:var(--violet)">Titre</div></div>
+                <div class="name">slideUp</div>
+                <div>0.8s · une fois<br>H1 du hero</div>
+            </div>
+            <div class="anim-box">
+                <div class="anim-stage"><div style="animation:fadeIn 2s ease-out infinite alternate; font-size:0.9rem; color:var(--text)">Texte hero</div></div>
+                <div class="name">fadeIn</div>
+                <div>0.8s · une fois<br>sous-titre, CTA</div>
+            </div>
+            <div class="anim-box">
+                <div class="anim-stage"><div style="animation:bounce 2s ease-in-out infinite; font-size:2rem">🎧</div></div>
+                <div class="name">bounce</div>
+                <div>2s · infini<br>mascotte, flèche</div>
+            </div>
+        </div>
+
+        <div class="specimen">
+            <div class="specimen-label">Keyframes — copier/coller</div>
+            <div class="specimen-code"><pre>@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-8px); }
+}
+
+@keyframes equalizer {
+    0%, 100% { transform: scaleY(0.3); }
+    50%      { transform: scaleY(1); }
+}
+
+/* Transitions UI */
+transition: all 0.25s;                                     /* standard */
+transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);    /* card hover (léger rebond) */
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+}</pre></div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════
+         10. APERÇU COMPLET
+    ════════════════════════════════════════════════ -->
+    <section class="section" id="apercu">
+        <h2 class="section-heading">Aperçu — page complète</h2>
+        <p class="section-desc">Tous les composants assemblés comme sur une vraie page.</p>
+
+        <div class="page-preview-wrap">
+            <div class="preview-bar">
+                <div class="preview-dot"></div>
+                <div class="preview-dot"></div>
+                <div class="preview-dot"></div>
+                <div class="preview-url">tunoova.com</div>
+            </div>
+
+            <!-- header -->
+            <div style="background:var(--violet); padding:0.9rem 1.5rem; box-shadow:0 10px 30px rgba(92,75,135,0.25); position:relative; z-index:2;">
+                <div class="ds-nav-inner">
+                    <img src="logo/tunoova-wordmark-violet.png" alt="Tunoova" style="height:28px">
+                    <ul style="display:flex; list-style:none; gap:1.25rem; flex-wrap:wrap;">
+                        <li><a href="#" style="color:#fff; text-decoration:none; font-weight:700; font-size:0.85rem;">Fonctionnalités</a></li>
+                        <li><a href="#" style="color:#fff; text-decoration:none; font-weight:700; font-size:0.85rem;">Tarifs</a></li>
+                        <li><a href="#" style="color:#fff; text-decoration:none; font-weight:700; font-size:0.85rem;">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- hero -->
+            <div style="background:linear-gradient(135deg,#453868,#5C4B87); padding:3rem 1.5rem; position:relative; overflow:hidden; display:flex; gap:2rem; align-items:center; flex-wrap:wrap;">
+                <div class="ds-ring deco" style="position:absolute; opacity:0.12; width:300px;height:300px;right:-80px;top:-100px;"></div>
+                <div style="position:relative; flex:1; min-width:240px;">
+                    <h1 style="font-family:'Fredoka',sans-serif; font-weight:700; font-size:clamp(2rem,5vw,3rem); line-height:1.05; color:var(--creme); margin-bottom:1rem;">Votre musique,<br><span style="color:var(--jaune)">votre serveur.</span></h1>
+                    <p style="max-width:420px; font-size:1rem; line-height:1.65; color:rgba(255,255,255,0.85); margin-bottom:1.75rem;">MP3, radios et podcasts réunis dans une seule application, installée chez vous.</p>
+                    <a href="#" class="ds-cta">Découvrir Tunoova</a>
+                </div>
+                <img src="../app/static/brand/app-icon-512.png" alt="" style="position:relative; width:170px; border-radius:22px; box-shadow:0 20px 50px rgba(0,0,0,0.25);">
+            </div>
+
+            <!-- features -->
+            <div style="padding:3rem 1.5rem;">
+                <h2 class="ds-section-title" style="font-size:2rem;">Tout ce qu'il vous faut</h2>
+                <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1.25rem; margin-top:2rem;">
+                    <div class="ds-card" style="width:auto; padding:1.4rem;">
+                        <div class="ds-card-icon" style="background:#FCE6DC; width:44px; height:44px; font-size:1.3rem;">🎵</div>
+                        <h3 class="ds-card-title" style="font-size:1.15rem;">Bibliothèque</h3>
+                        <p class="ds-card-text" style="font-size:0.85rem;">Vos MP3 avec pochettes, classés automatiquement.</p>
+                    </div>
+                    <div class="ds-card" style="width:auto; padding:1.4rem;">
+                        <div class="ds-card-icon" style="background:#FDF0D5; width:44px; height:44px; font-size:1.3rem;">🎙️</div>
+                        <h3 class="ds-card-title" style="font-size:1.15rem;">Podcasts</h3>
+                        <p class="ds-card-text" style="font-size:0.85rem;">Abonnements et nouveaux épisodes automatiques.</p>
+                    </div>
+                    <div class="ds-card" style="width:auto; padding:1.4rem;">
+                        <div class="ds-card-icon" style="background:#DDEFE3; width:44px; height:44px; font-size:1.3rem;">📻</div>
+                        <h3 class="ds-card-title" style="font-size:1.15rem;">Radios</h3>
+                        <p class="ds-card-text" style="font-size:0.85rem;">Des milliers de stations, partout dans le monde.</p>
+                    </div>
+                    <div class="ds-card" style="width:auto; padding:1.4rem;">
+                        <div class="ds-card-icon" style="background:#DCE8F2; width:44px; height:44px; font-size:1.3rem;">🔊</div>
+                        <h3 class="ds-card-title" style="font-size:1.15rem;">Enceintes</h3>
+                        <p class="ds-card-text" style="font-size:0.85rem;">Diffusion DLNA et SoundTouch depuis le téléphone.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- bandeau CTA -->
+            <div style="margin:0 1.5rem 3rem; background:var(--lavande); border-radius:20px; padding:2rem; display:flex; align-items:center; justify-content:space-between; gap:1.5rem; flex-wrap:wrap;">
+                <div style="display:flex; align-items:center; gap:1rem;">
+                    <div class="ds-ring" style="width:44px;height:44px"></div>
+                    <div style="font-family:'Fredoka',sans-serif; font-weight:600; font-size:1.4rem; color:var(--violet-dark)">Prêt à écouter&nbsp;?</div>
+                </div>
+                <a href="#" class="ds-cta">Installer Tunoova</a>
+            </div>
+
+            <!-- footer -->
+            <div style="background:var(--violet-dark); padding:1.25rem 1.5rem; text-align:center;">
+                <p style="color:rgba(245,233,211,0.75); font-size:0.8rem;">© 2026 Tunoova — <a href="#" style="color:inherit; text-decoration:none;">Mentions légales</a> · <a href="#" style="color:inherit; text-decoration:none;">Contact</a></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════
+         11. TOKENS CSS
+    ════════════════════════════════════════════════ -->
+    <section class="section" id="tokens">
+        <h2 class="section-heading">Tokens CSS — copier/coller</h2>
+        <p class="section-desc">Le bloc de départ complet pour le site commercial.</p>
+
+        <div class="specimen">
+            <div class="specimen-code"><pre>/* ─── IMPORT FONTS ─────────────────────────────────── */
+&lt;link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&amp;family=Nunito:wght@400;600;700;800&amp;display=swap" rel="stylesheet"&gt;
+
+/* ─── TOKENS ────────────────────────────────────────── */
+:root {
+    /* Marque */
+    --violet:       #5C4B87;   /* couleur principale (logo, header)  */
+    --violet-dark:  #453868;   /* survol, footer                     */
+    --violet-mid:   #7A64B8;   /* fin de dégradé                     */
+    --violet-light: #9C8AD6;   /* bordures actives douces            */
+    --lavande:      #EDE9F5;   /* fonds teintés                      */
+    --creme:        #F5E9D3;   /* lettrage du logo, texte sur violet */
+
+    /* Accents (anneaux du logo) */
+    --orange: #E8632A;         /* action / CTA                       */
+    --orange-dark: #C9501C;   /* survol CTA, bouton orange < 19px (contraste AA) */
+    --jaune:  #F2B33D;         /* mise en valeur                     */
+    --vert:   #3E9B5C;         /* succès / inclus                    */
+    --bleu:   #2D6E9E;         /* info                               */
+
+    /* Neutres */
+    --bg:         #FAFAFC;
+    --surface:    #FFFFFF;
+    --text:       #1F1B2E;
+    --text-muted: #6B6478;
+    --border:     #E5E1EC;
+
+    /* Fonctionnel */
+    --error:  #B3261E;
+    --notif:  #E3342F;
+
+    /* Dégradés */
+    --gradient-rainbow: linear-gradient(90deg, #E8632A, #F2B33D, #3E9B5C, #2D6E9E);
+    --gradient-violet:  linear-gradient(135deg, #5C4B87, #7A64B8);
+
+    /* Formes */
+    --radius-sm: 8px;  --radius-md: 12px;  --radius-lg: 16px;  --radius-xl: 20px;  --radius-pill: 999px;
+    --shadow-card:       0 4px 20px rgba(31, 27, 46, 0.06);
+    --shadow-card-hover: 0 16px 40px rgba(92, 75, 135, 0.18);
+    --shadow-cta:        0 8px 22px rgba(232, 99, 42, 0.35);
+
+    --font-display: 'Fredoka', sans-serif;
+    --font-body:    'Nunito', sans-serif;
+}
+
+/* ─── MODE SOMBRE (valeurs de l'application) ────────── */
+[data-theme="dark"] {
+    --violet:      #8A7CC4;
+    --violet-dark: #A79AE0;
+    --bg:          #17151F;
+    --surface:     #211E2C;
+    --text:        #F0EEF7;
+    --text-muted:  #A79FB8;
+    --border:      #3A3548;
+}
+
+/* ─── BASE ──────────────────────────────────────────── */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+}
+h1, h2, h3 { font-family: var(--font-display); }
+a { color: var(--violet); }</pre></div>
+        </div>
+    </section>
+
+</main>
+</body>
+</html>

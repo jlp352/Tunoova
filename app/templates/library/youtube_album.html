@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% import "library/_macros.html" as m %}
+{% block title %}{{ album.title }}{% endblock %}
+{% block header_back %}
+  <a class="icon-btn back-btn" href="{{ back_url }}" aria-label="{{ t('common_back') }}">{{ icon('arrow-left') }}</a>
+{% endblock %}
+{% block header_title %}{{ album.title }}{% endblock %}
+{% block content %}
+<div class="library-screen">
+  <div class="library-detail-header">
+    {% if album.artist %}
+      <h2 class="library-detail-title">{{ album.artist }}</h2>
+      <p class="library-detail-subtitle">{{ album.title }}</p>
+    {% else %}
+      <h2 class="library-detail-title">{{ album.title }}</h2>
+    {% endif %}
+  </div>
+  <ul class="track-list">
+    {% for track in album.tracks %}
+      {{ m.yt_track_row(track, request.args.get('back')) }}
+    {% else %}
+      <li class="track-item empty-state">{{ t('library_no_tracks') }}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

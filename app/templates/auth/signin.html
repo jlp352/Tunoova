@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block title %}{{ t('signin_title') }} - {{ t('app_name') }}{% endblock %}
+{% block content %}
+<div class="signin-screen">
+  <img class="signin-badge" src="{{ url_for('static', filename='brand/logo-badge.png') }}" alt="{{ t('app_name') }}">
+
+  <h1 class="signin-heading">{{ t('signin_heading') }}</h1>
+
+  <form method="post" action="{{ url_for('auth.signin') }}" class="auth-form signin-main-form" novalidate hx-boost="false">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label for="email">{{ t('signin_email') }}:</label>
+    <input type="email" id="email" name="email" placeholder="email@tunoova.com" value="{{ email_value or '' }}" required autofocus
+           data-required-error="{{ t('userprofile_error_email_required') }}">
+
+    <label for="password">{{ t('signin_password') }}:</label>
+    <input type="password" id="password" name="password" placeholder="*****" required
+           data-required-error="{{ t('signin_error_password_required') }}">
+
+    <button type="submit" class="btn-primary">{{ t('signin_submit') }}</button>
+  </form>
+
+  <div class="signin-links-row">
+    <button type="button" class="auth-modal-trigger" onclick="document.getElementById('create-account-modal').showModal()">{{ t('signin_create_account') }}</button>
+    <button type="button" class="auth-modal-trigger auth-modal-trigger-right" onclick="document.getElementById('forgot-password-modal').showModal()">{{ t('signin_forgot_password') }}</button>
+  </div>
+
+  <dialog id="create-account-modal" class="app-modal">
+    <div class="app-modal-header">
+      <h2>{{ t('signin_create_account') }}</h2>
+      <button type="button" class="app-modal-close" onclick="document.getElementById('create-account-modal').close()" aria-label="{{ t('common_back') }}">{{ icon('x') }}</button>
+    </div>
+    <div class="app-modal-body" id="create-account-modal-body">
+      <form method="post" action="{{ url_for('auth.request_account') }}" class="auth-form"
+            hx-post="{{ url_for('auth.request_account') }}" hx-target="#create-account-modal-body"
+            hx-select=".auth-secondary-confirm,.btn-primary" hx-swap="innerHTML">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="visually-hidden" aria-hidden="true">
+          <input type="text" name="website" tabindex="-1" autocomplete="off">
+        </div>
+        <label for="create-account-name">{{ t('firstlogin_fullname') }}</label>
+        <input type="text" id="create-account-name" name="fullname" placeholder="{{ t('firstlogin_fullname') }}" required>
+        <label for="create-account-email">{{ t('signin_email') }}</label>
+        <input type="email" id="create-account-email" name="email" placeholder="{{ t('signin_email') }}" required>
+        <button type="submit" class="btn-primary">{{ t('signin_create_account') }}</button>
+      </form>
+    </div>
+  </dialog>
+
+  <dialog id="forgot-password-modal" class="app-modal">
+    <div class="app-modal-header">
+      <h2>{{ t('signin_forgot_password') }}</h2>
+      <button type="button" class="app-modal-close" onclick="document.getElementById('forgot-password-modal').close()" aria-label="{{ t('common_back') }}">{{ icon('x') }}</button>
+    </div>
+    <div class="app-modal-body" id="forgot-password-modal-body">
+      <form method="post" action="{{ url_for('auth.request_reset') }}" class="auth-form"
+            hx-post="{{ url_for('auth.request_reset') }}" hx-target="#forgot-password-modal-body"
+            hx-select=".auth-secondary-confirm,.btn-primary" hx-swap="innerHTML">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="visually-hidden" aria-hidden="true">
+          <input type="text" name="website" tabindex="-1" autocomplete="off">
+        </div>
+        <label for="forgot-password-email">{{ t('signin_email') }}</label>
+        <input type="email" id="forgot-password-email" name="email" placeholder="{{ t('signin_email') }}" required>
+        <button type="submit" class="btn-primary">{{ t('signin_forgot_password') }}</button>
+      </form>
+    </div>
+  </dialog>
+
+  <dialog id="signin-password-saved-modal" class="app-modal">
+    <div class="app-modal-header">
+      <h2>{{ t('signin_password_saved_title') }}</h2>
+      <button type="button" class="app-modal-close" onclick="this.closest('dialog').close()" aria-label="{{ t('common_back') }}">{{ icon('x') }}</button>
+    </div>
+    <div class="app-modal-body">
+      <p>{{ t('signin_password_saved_message') }}</p>
+      <div class="modal-actions">
+        <button type="button" class="btn-dark" onclick="this.closest('dialog').close()">{{ t('common_ok') }}</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="signin-error-modal" class="app-modal">
+    <div class="app-modal-header">
+      <h2 id="signin-error-modal-title">
+        {% if error %}{{ t('common_error_title') }}{% else %}{{ t('userprofile_required_field_title') }}{% endif %}
+      </h2>
+      <button type="button" class="app-modal-close" onclick="this.closest('dialog').close()" aria-label="{{ t('common_back') }}">{{ icon('x') }}</button>
+    </div>
+    <div class="app-modal-body">
+      <p id="signin-error-modal-message">
+        {% if error %}
+          {% if error[0] == 'locked' %}
+            {{ t('signin_error_locked', minutes=error[1]) }}
+          {% else %}
+            {{ t('signin_error_invalid') }}
+          {% endif %}
+        {% endif %}
+      </p>
+      <div class="modal-actions">
+        <button type="button" class="btn-dark" onclick="this.closest('dialog').close()">{{ t('common_ok') }}</button>
+      </div>
+    </div>
+  </dialog>
+
+  <p class="signin-legal">
+    {{ t('signin_legal_prefix') }}
+    <a class="signin-legal-link" href="{{ url_for('auth.terms') }}">{{ t('signin_terms_title') }}</a>
+    {{ t('signin_legal_and') }}
+    <a class="signin-legal-link" href="{{ url_for('auth.privacy') }}">{{ t('signin_privacy_title') }}</a>.
+  </p>
+
+  <img class="signin-illustration" src="{{ url_for('static', filename='brand/signin-illustration.png') }}" alt="">
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.querySelectorAll('dialog.app-modal').forEach(function (dialog) {
+    dialog.addEventListener('click', function (evt) {
+      if (evt.target === dialog) dialog.close();
+    });
+  });
+
+  function tunoovaShowSigninError(title, message) {
+    document.getElementById('signin-error-modal-title').textContent = title;
+    document.getElementById('signin-error-modal-message').textContent = message;
+    document.getElementById('signin-error-modal').showModal();
+  }
+
+  document.querySelector('.signin-main-form').addEventListener('submit', function (evt) {
+    var fields = [document.getElementById('email'), document.getElementById('password')];
+    for (var i = 0; i < fields.length; i++) {
+      if (!fields[i].value.trim()) {
+        evt.preventDefault();
+        tunoovaShowSigninError("{{ t('userprofile_required_field_title') }}", fields[i].dataset.requiredError);
+        fields[i].focus();
+        return;
+      }
+    }
+  });
+
+  {% if error %}
+    document.getElementById('signin-error-modal').showModal();
+  {% elif password_saved %}
+    document.getElementById('signin-password-saved-modal').showModal();
+  {% endif %}
+</script>
+{% endblock %}

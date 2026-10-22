@@ -1,0 +1,36 @@
+{% macro radio_row(sub) %}
+<div class="radio-card" id="radio-card-{{ sub.RadioUsersId }}">
+  <button type="button" class="radio-play-btn" onclick="tunoovaStartPlayback('{{ url_for('radio.play', radio_users_id=sub.RadioUsersId) }}')">
+    {% if sub.LinkImage %}
+      <img class="tile-thumb" src="{{ sub.LinkImage }}" alt=""
+           onerror="this.replaceWith(Object.assign(document.createElement('span'), {className: 'tile-thumb tile-thumb-placeholder', textContent: '📻'}))">
+    {% else %}
+      <span class="tile-thumb tile-thumb-placeholder">📻</span>
+    {% endif %}
+    <span class="radio-card-info">
+      <span class="radio-card-title">{{ sub.RadioName }}</span>
+      <span class="radio-live-badge">{{ t('radio_live') }}</span>
+    </span>
+  </button>
+  <button type="button" class="icon-btn" title="{{ t('common_delete') }}"
+          onclick="document.getElementById('delete-modal-{{ sub.RadioUsersId }}').showModal()">{{ icon('trash-2') }}</button>
+  <a class="icon-btn" href="{{ url_for('radio.edit', radio_users_id=sub.RadioUsersId) }}" title="{{ t('common_edit') }}">&#9998;</a>
+
+  <dialog id="delete-modal-{{ sub.RadioUsersId }}" class="app-modal">
+    <div class="app-modal-header">
+      <h2>{{ t('common_delete') }}</h2>
+      <button type="button" class="app-modal-close" onclick="this.closest('dialog').close()" aria-label="{{ t('common_back') }}">{{ icon('x') }}</button>
+    </div>
+    <div class="app-modal-body">
+      <p>{{ t('radio_delete_confirm') }}</p>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" onclick="this.closest('dialog').close()">{{ t('common_cancel') }}</button>
+        <button type="button" class="btn-dark"
+                hx-post="{{ url_for('radio.delete', radio_users_id=sub.RadioUsersId) }}"
+                hx-target="#radio-card-{{ sub.RadioUsersId }}" hx-swap="delete"
+                hx-headers='{"X-CSRFToken": "{{ csrf_token() }}"}'>{{ t('common_ok') }}</button>
+      </div>
+    </div>
+  </dialog>
+</div>
+{% endmacro %}

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}{{ t('nav_podcast') }}{% endblock %}
+{% block header_title %}{{ t('nav_podcast') }}{% endblock %}
+{% block header_back %}<img class="app-header-logo" src="{{ url_for('static', filename='brand/header-mascot.png') }}" alt="">{% endblock %}
+{% block content %}
+<div class="podcast-screen" hx-history="false">
+  <div class="screen-toolbar">
+    <input type="search" name="q" enterkeyhint="search" value="{{ q }}" placeholder="{{ t('podcast_search_placeholder') }}"
+           class="search-input"
+           hx-get="{{ url_for('podcast.list_fragment') }}"
+           hx-trigger="keyup changed delay:300ms, search"
+           hx-target="#podcast-list" hx-select="#podcast-list" hx-swap="outerHTML"
+           hx-include="[name='sort']:checked">
+
+    <button type="button" class="icon-btn" onclick="document.getElementById('sort-modal').showModal()" title="{{ t('podcast_sort_title') }}">{{ icon('arrow-up-down') }}</button>
+
+    <a class="icon-btn" href="{{ url_for('podcast.add_advanced') }}" title="{{ t('podcast_advanced') }}">{{ icon('circle-plus') }}</a>
+  </div>
+
+  <dialog id="sort-modal" class="app-modal">
+    <div class="app-modal-header">
+      <h2>{{ icon('arrow-up-down') }} {{ t('podcast_sort_title') }}</h2>
+      <button type="button" class="app-modal-close" onclick="document.getElementById('sort-modal').close()" aria-label="{{ t('common_back') }}">{{ icon('x') }}</button>
+    </div>
+    <div class="app-modal-body">
+      <form class="sort-form"
+            hx-get="{{ url_for('podcast.list_fragment') }}"
+            hx-target="#podcast-list" hx-select="#podcast-list" hx-swap="outerHTML"
+            hx-include="[name='q']">
+        <input type="hidden" name="save_sort" value="1">
+        <label class="sort-option">
+          <input type="radio" name="sort" value="newest" {% if sort == 'newest' %}checked{% endif %}>
+          {{ t('sort_newest') }}
+        </label>
+        <label class="sort-option">
+          <input type="radio" name="sort" value="oldest" {% if sort == 'oldest' %}checked{% endif %}>
+          {{ t('sort_oldest') }}
+        </label>
+        <label class="sort-option">
+          <input type="radio" name="sort" value="az" {% if sort == 'az' or not sort %}checked{% endif %}>
+          {{ t('sort_az') }}
+        </label>
+        <label class="sort-option">
+          <input type="radio" name="sort" value="za" {% if sort == 'za' %}checked{% endif %}>
+          {{ t('sort_za') }}
+        </label>
+        <button type="submit" class="btn-primary" onclick="document.getElementById('sort-modal').close()">{{ t('common_ok') }}</button>
+      </form>
+    </div>
+  </dialog>
+
+  {% include "podcast/_list.html" %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if scroll_to %}
+<script>
+  (function () {
+    var target = document.getElementById('podcast-block-{{ scroll_to }}');
+    if (!target) return;
+    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    target.classList.add('just-added');
+    setTimeout(function () { target.classList.remove('just-added'); }, 2000);
+  })();
+</script>
+{% endif %}
+{% endblock %}

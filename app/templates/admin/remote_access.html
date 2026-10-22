@@ -1,0 +1,202 @@
+{% extends "admin/layout.html" %}
+{% block title %}{{ t('admin_remote_tab') }}{% endblock %}
+{% block content %}
+<h1>{{ t('admin_remote_tab') }}</h1>
+<p class="admin-field-hint">{{ t('admin_remote_intro') }}</p>
+
+{% set task = ts.task %}
+<form method="post" action="{{ url_for('admin.remote_access_mode') }}" class="remote-card admin-settings-form" id="remote-mode-form">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <h2>{{ t('admin_remote_mode_title') }}</h2>
+
+  {% set selected = pending_mode or mode %}
+  <div class="remote-options">
+    {% for m in ('off', 'private', 'external', 'public') %}
+      <label class="remote-option">
+        <input type="radio" name="mode" value="{{ m }}" {{ 'checked' if selected == m }}>
+        <span><strong>{{ t('admin_remote_mode_' ~ m) }}</strong><span class="admin-field-hint">{{ t('admin_remote_mode_' ~ m ~ '_hint') }}</span></span>
+      </label>
+    {% endfor %}
+  </div>
+
+  <label class="remote-hostname" data-show-for="external">
+    {{ t('admin_remote_hostname') }}
+    <input type="text" name="hostname" value="{{ hostname }}" list="remote-hostnames" placeholder="{{ t('admin_remote_hostname_placeholder') }}" autocomplete="off" spellcheck="false">
+    <datalist id="remote-hostnames">
+      {% for name in hostname_suggestions %}<option value="{{ name }}">{% endfor %}
+    </datalist>
+  </label>
+  <p class="text-error" data-show-for="external public">{{ t('admin_remote_public_warning') }}</p>
+
+  {% if mode in ('private', 'public') and ts_ready and ts.exposure != mode and not (task and task.running) %}
+    <p class="text-error">{{ t('admin_remote_ts_mismatch') }}</p>
+  {% endif %}
+
+  <div><button type="submit" class="btn-primary">{{ t('admin_remote_apply') }}</button></div>
+</form>
+
+{% if ts.state != 'NotInstalled' %}
+<section class="remote-card">
+  <h2>{{ t('admin_remote_ts_title') }}</h2>
+
+  {% if ts.state == 'DaemonFailed' %}
+    <p class="text-error">{{ t('admin_remote_ts_daemon_failed') }}</p>
+    <pre class="remote-command">sudo {{ install_script }} update</pre>
+    <p class="admin-field-hint">{{ t('admin_remote_ts_daemon_failed_log') }}</p>
+    <pre class="remote-command">sudo journalctl -u tailscaled -n 30 --no-pager</pre>
+
+  {% elif ts.state == 'NoDaemon' %}
+    <p>{{ t('admin_remote_ts_no_daemon') }}</p>
+    <pre class="remote-command">sudo systemctl start tailscaled</pre>
+
+  {% elif ts.auth_url or ts.state in ('NeedsLogin', 'NeedsMachineAuth') %}
+    <p>{{ t('admin_remote_ts_needs_login') }}</p>
+    {% if ts.auth_url %}
+      <p class="admin-field-hint">{{ t('admin_remote_ts_login_hint') }}</p>
+      <div class="remote-link">
+        <a class="btn-primary" href="{{ ts.auth_url }}" target="_blank" rel="noopener">{{ icon('external-link') }} {{ t('admin_remote_ts_login_open') }}</a>
+        <div class="remote-qr">{{ auth_qr }}</div>
+      </div>
+      <p class="admin-field-hint">{{ t('admin_remote_ts_waiting') }}</p>
+    {% elif not pending_mode %}
+      <p class="admin-field-hint">{{ t('admin_remote_ts_choose_mode') }}</p>
+    {% endif %}
+
+  {% elif ts.state == 'Stopped' %}
+    <p>{{ t('admin_remote_ts_stopped') }}</p>
+    <p class="admin-field-hint">{{ t('admin_remote_ts_choose_mode') }}</p>
+
+  {% elif ts.state == 'Running' %}
+    <p><span class="remote-dot"></span> {{ t('admin_remote_ts_connected', name=ts.hostname or '') }}</p>
+    <p class="admin-field-hint">{{ t('admin_remote_ts_exposure', label=t('admin_remote_exposure_' ~ ts.exposure)) }}</p>
+
+  {% elif ts.state == 'Connecting' %}
+    <p>{{ t('admin_remote_ts_connecting') }}</p>
+
+  {% else %}
+    <p>{{ t('admin_remote_ts_starting') }}</p>
+  {% endif %}
+
+  {% if task and task.running and task.kind != 'login' %}
+    <p>{{ t('admin_remote_ts_authorize', label=t('admin_remote_mode_' ~ task.kind)) }}</p>
+    <div class="remote-link">
+      {% if task.url %}
+        <a class="btn-primary" href="{{ task.url }}" target="_blank" rel="noopener">{{ icon('external-link') }} {{ t('admin_remote_ts_authorize_open') }}</a>
+        <div class="remote-qr">{{ task_qr }}</div>
+      {% else %}
+        <a href="{{ console_url }}" target="_blank" rel="noopener">{{ t('admin_remote_ts_authorize_nolink') }}</a>
+      {% endif %}
+    </div>
+    <p class="admin-field-hint">{{ t('admin_remote_ts_waiting') }}</p>
+  {% endif %}
+
+  {% if ts_denied %}
+    <p class="text-error">{{ t('admin_remote_ts_operator', user=app_user) }}</p>
+    <pre class="remote-command">sudo tailscale set --operator={{ app_user }}</pre>
+  {% endif %}
+  {% if task and task.error and not (task.kind == 'login' and ts_ready) %}
+    <p class="text-error">{{ t('admin_remote_ts_error') }}</p>
+    <pre class="admin-update-log">{{ task.error }}</pre>
+  {% elif ts.error and ts.state not in ('NoDaemon', 'DaemonFailed') %}
+    <p class="text-error">{{ t('admin_remote_ts_error') }}</p>
+    <pre class="admin-update-log">{{ ts.error }}</pre>
+  {% endif %}
+  {% if pending_mode %}
+    <p class="admin-field-hint">{{ t('admin_remote_ts_pending_mode', label=t('admin_remote_mode_' ~ pending_mode)) }}</p>
+  {% endif %}
+</section>
+{% endif %}
+
+{% if public_url %}
+<section class="remote-card">
+  <h2>{{ t('admin_remote_url_title') }}</h2>
+  <div class="remote-url">
+    <a href="{{ public_url }}" target="_blank" rel="noopener" id="remote-url">{{ public_url }}</a>
+    <button type="button" class="btn-secondary" id="remote-copy" data-copied="{{ t('admin_remote_copied') }}">{{ t('admin_remote_copy') }}</button>
+  </div>
+  <div class="remote-qr">{{ public_qr }}</div>
+  {% if mode == 'public' %}
+    <p class="admin-field-hint">{{ t('admin_remote_funnel_dns_hint') }}</p>
+  {% endif %}
+</section>
+{% endif %}
+
+<script>
+(function () {
+  // Champ nom DNS et avertissement "Public" : affiches selon le mode coche.
+  var form = document.getElementById('remote-mode-form');
+  // Choix coche mais pas encore applique : garde a travers le rechargement
+  // automatique de la page (attente de connexion a Tailscale).
+  var DRAFT_KEY = 'tunoova-network-draft';
+  var dirty = false;
+  try {
+    var draft = JSON.parse(sessionStorage.getItem(DRAFT_KEY) || 'null');
+    sessionStorage.removeItem(DRAFT_KEY);
+    if (draft) {
+      var radio = form.querySelector('input[name="mode"][value="' + draft.mode + '"]');
+      if (radio) radio.checked = true;
+      form.elements.hostname.value = draft.hostname;
+      dirty = true;
+    }
+  } catch (e) {}
+  form.addEventListener('input', function () { dirty = true; });
+  form.addEventListener('change', function () { dirty = true; });
+  function reloadPage() {
+    if (dirty) {
+      var checked = form.querySelector('input[name="mode"]:checked');
+      try {
+        sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ mode: checked ? checked.value : '', hostname: form.elements.hostname.value }));
+      } catch (e) {}
+    }
+    location.reload();
+  }
+
+  function syncMode() {
+    var checked = form.querySelector('input[name="mode"]:checked');
+    var mode = checked ? checked.value : '';
+    form.querySelectorAll('[data-show-for]').forEach(function (el) {
+      el.hidden = el.dataset.showFor.split(' ').indexOf(mode) === -1;
+    });
+  }
+  form.addEventListener('change', syncMode);
+  syncMode();
+
+  var copyBtn = document.getElementById('remote-copy');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', function () {
+      var url = document.getElementById('remote-url').textContent;
+      var done = function () {
+        var label = copyBtn.textContent;
+        copyBtn.textContent = copyBtn.dataset.copied;
+        setTimeout(function () { copyBtn.textContent = label; }, 1500);
+      };
+      // navigator.clipboard n'existe qu'en HTTPS (pas en http://IP:port).
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(url).then(done);
+        return;
+      }
+      var input = document.createElement('textarea');
+      input.value = url;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand('copy');
+      input.remove();
+      done();
+    });
+  }
+
+  {% if waiting %}
+  // Connexion ou autorisation en cours sur le site de Tailscale : recharge
+  // la page des que l'etat change.
+  var statusUrl = {{ url_for('admin.remote_access_status')|tojson }};
+  var key = {{ wait_key|tojson }};
+  setInterval(function () {
+    fetch(statusUrl, { headers: { 'Accept': 'application/json' } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) { if (data && data.key !== key) reloadPage(); })
+      .catch(function () {});
+  }, 3000);
+  {% endif %}
+})();
+</script>
+{% endblock %}

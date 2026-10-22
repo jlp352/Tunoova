@@ -1,0 +1,30 @@
+{
+  "fr": {
+    "radios": [
+      {"name": "France Inter", "url": "https://icecast.radiofrance.fr/franceinter-hifi.aac", "image": "https://upload.wikimedia.org/wikipedia/fr/3/39/France_Inter_logo.svg"},
+      {"name": "franceinfo", "url": "https://icecast.radiofrance.fr/franceinfo-hifi.aac", "image": "https://charte.radiofrance.fr/images/franceinfo/franceinfo2.png"},
+      {"name": "FIP", "url": "https://icecast.radiofrance.fr/fip-hifi.aac", "image": "https://upload.wikimedia.org/wikipedia/commons/1/16/FIP_logo_2021.svg"},
+      {"name": "RTL", "url": "https://live.m6radio.quortex.io/webM89Hc99XApzgfhXNX8ASN5/grouprtl/national/short/audio-64000/index.m3u8", "image": "https://duckduckgo.com/i/035a5e15d396c67a.png"},
+      {"name": "Nostalgie", "url": "https://streaming.nrjaudio.fm/ouwgwqsk6j4d", "image": "https://img.nrj.fr/L3zosrZkW7lmgFtxF9yG8USZq6c=/medias%2F2022%2F02%2F62150f1f4ce26_62150f240ef6d.svg"}
+    ],
+    "podcasts": [
+      {"name": "Affaires Sensibles", "rss": "https://radiofrance-podcast.net/podcast09/rss_13940.xml", "image": "https://www.radiofrance.fr/s3/cruiser-production/2023/04/7b50cf5f-f5bd-4dc4-8b1d-b08666768dcf/400x400_sc_affaires-sensibles.jpg"},
+      {"name": "Les Grosses Têtes", "rss": "https://feeds.audiomeans.fr/feed/d7c6111b-04c1-46bc-b74c-d941a90d37fb.xml", "image": "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/fe/04/9f/fe049f64-d03c-3995-f7ed-ecd5c7bfa3fb/mza_10862868553998545135.jpg/600x600bb.jpg"},
+      {"name": "L'Heure Du Crime", "rss": "https://feeds.audiomeans.fr/feed/de5ba943-e720-4988-a518-40404f231ff3.xml", "image": "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/06/93/a2/0693a211-5cef-a5ce-c788-e3e897964785/mza_9139408145449524526.jpg/600x600bb.jpg"}
+    ]
+  },
+  "en": {
+    "radios": [
+      {"name": "BBC World Service", "url": "https://stream.live.vc.bbcmedia.co.uk/bbc_world_service", "image": "https://rmp.files.bbci.co.uk/rmp-shared-assets/1.4.0/img/network-logos/national/bbc_world_service_colour.svg"},
+      {"name": "Classic FM", "url": "https://media-ice.musicradio.com/ClassicFMMP3", "image": "https://upload.wikimedia.org/wikipedia/commons/a/ae/Classic_FM_logo.svg"},
+      {"name": "KEXP 90.3 Seattle", "url": "https://kexp.streamguys1.com/kexp160.aac", "image": "https://upload.wikimedia.org/wikipedia/commons/d/dd/KEXP_logo_%28black_on_orange%29.svg"},
+      {"name": "Jazz24", "url": "https://knkx-live-a.edge.audiocdn.com/6285_128k", "image": "https://npr.brightspotcdn.com/dims4/default/032ce25/2147483647/strip/true/crop/900x900+0+0/resize/1760x1760!/format/webp/quality/90/?url=http%3A%2F%2Fnpr-brightspot.s3.amazonaws.com%2F98%2Ff7%2F48229ba341b0b1c8933834130d10%2Fjazz24.jpg"},
+      {"name": "Radio Paradise", "url": "https://stream.radioparadise.com/aac-128", "image": "https://radioparadise.com/apple-touch-icon.png"}
+    ],
+    "podcasts": [
+      {"name": "The Daily", "rss": "https://feeds.simplecast.com/Sl5CSM3S", "image": "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/ab/64/66/ab6466a9-9a7d-e20e-7a3d-bc5be37d29ce/mza_15084852813176276273.jpg/600x600bb.jpg"},
+      {"name": "Global News Podcast", "rss": "https://podcasts.files.bbci.co.uk/p02nq0gn.rss", "image": "https://is1-ssl.mzstatic.com/image/thumb/Podcasts211/v4/f1/4f/d1/f14fd1cf-7b5c-0bb7-683d-325c83bb089e/mza_17540730169954302156.jpg/600x600bb.jpg"},
+      {"name": "Hidden Brain", "rss": "https://feeds.simplecast.com/kwWc0lhf", "image": "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/e2/18/b8/e218b838-b790-3a33-441f-c3772d9abbbf/mza_6896085647855199484.jpg/600x600bb.jpg"}
+    ]
+  }
+}

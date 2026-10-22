@@ -1,0 +1,42 @@
+{% import "podcast/_macros.html" as m %}
+<div id="podcast-list">
+  {% if q and q|length >= 3 %}
+    <h2 class="search-section-title">{{ t('podcast_local_results') }}</h2>
+    {% for sub in name_matches %}
+      {{ m.podcast_tile(sub) }}
+    {% endfor %}
+    {% for sub, episodes in episode_matches %}
+      {{ m.episode_match_block(sub, episodes) }}
+    {% endfor %}
+    {% if not name_matches and not episode_matches %}
+      <p class="empty-state">{{ t('podcast_no_local_results') }}</p>
+    {% endif %}
+  {% else %}
+    {% for sub in subscriptions %}
+      {{ m.podcast_tile(sub) }}
+    {% else %}
+      <p class="empty-state">{{ t('podcast_empty') }}</p>
+    {% endfor %}
+  {% endif %}
+
+  {% if q and q|length >= 3 %}
+    <h2 class="search-section-title">{{ t('podcast_api_results') }}</h2>
+    {% for r in add_results %}
+      <form method="post" action="{{ url_for('podcast.add_submit') }}" class="add-result-card">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="name" value="{{ r.name }}">
+        <input type="hidden" name="feed_url" value="{{ r.feed_url }}">
+        <input type="hidden" name="image_url" value="{{ r.image or '' }}">
+        {% if r.image %}
+          <img class="tile-thumb" src="{{ r.image }}" alt="">
+        {% else %}
+          <span class="tile-thumb tile-thumb-placeholder">🎙</span>
+        {% endif %}
+        <span class="add-result-name">{{ r.name }}{% if r.artist %} — {{ r.artist }}{% endif %}</span>
+        <button type="submit" class="add-result-action">{{ t('common_add') }}</button>
+      </form>
+    {% else %}
+      <p class="empty-state">{{ t('podcast_no_results') }}</p>
+    {% endfor %}
+  {% endif %}
+</div>

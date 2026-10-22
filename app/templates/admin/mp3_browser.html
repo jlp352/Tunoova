@@ -1,0 +1,615 @@
+{% extends "admin/layout.html" %}
+{% block title %}{{ t('admin_mp3_browser_title') }}{% endblock %}
+{% block content_class %}admin-content-wide{% endblock %}
+{% block content %}
+<h1>{{ t('admin_mp3_browser_title') }}</h1>
+<p class="admin-field-hint">{{ t('admin_mp3_intro', path=root_path) }}</p>
+
+<div id="mp3-msg" class="flash" hidden></div>
+{% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
+
+<div class="admin-settings-buttons mp3-toolbar">
+  <button type="button" class="btn-primary" id="mp3-new-folder">{{ icon('folder-plus') }} {{ t('admin_mp3_new_folder') }}</button>
+  <button type="button" class="btn-primary" onclick="document.getElementById('mp3-file-input').click()">{{ icon('upload') }} {{ t('admin_mp3_upload_files') }}</button>
+  <button type="button" class="btn-primary" onclick="document.getElementById('mp3-folder-input').click()">{{ icon('folder-up') }} {{ t('admin_mp3_upload_folder') }}</button>
+  {% if listing.files %}
+    <button type="button" class="btn-primary" id="mp3-folder-tags">{{ icon('tag') }} {{ t('admin_mp3_folder_tags') }}</button>
+  {% endif %}
+  <button type="button" class="btn-primary mp3-scan-btn" id="mp3-scan">{{ icon('refresh-cw') }} <span>{{ t('admin_mp3_scan') }}</span></button>
+  <input type="file" id="mp3-file-input" accept=".mp3,audio/mpeg" multiple hidden>
+  <input type="file" id="mp3-folder-input" webkitdirectory multiple hidden>
+</div>
+
+<nav class="mp3-crumbs">
+  <a href="{{ url_for('admin.mp3_browser') }}" class="mp3-drop" data-dest="">{{ icon('house') }} MP3</a>
+  {% for crumb in listing.crumbs %}
+    <span class="mp3-crumb-sep">/</span>
+    <a href="{{ url_for('admin.mp3_browser', path=crumb.path) }}" class="mp3-drop" data-dest="{{ crumb.path }}">{{ crumb.name }}</a>
+  {% endfor %}
+</nav>
+
+<div id="mp3-progress" class="mp3-progress" hidden>
+  <div class="mp3-progress-bar"><span id="mp3-progress-fill"></span></div>
+  <span id="mp3-progress-text"></span>
+</div>
+
+<div class="admin-table-wrap mp3-dropzone" id="mp3-dropzone">
+  <table class="admin-table mp3-table">
+    <thead>
+      <tr>
+        <th>{{ t('admin_mp3_col_name') }}</th>
+        <th>{{ t('admin_mp3_col_size') }}</th>
+        <th>{{ t('admin_mp3_col_date') }}</th>
+        <th>{{ t('admin_col_actions') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% if listing.crumbs %}
+        {% set parent = listing.crumbs[-2].path if listing.crumbs|length > 1 else '' %}
+        <tr class="mp3-row mp3-drop" data-dest="{{ parent }}">
+          <td colspan="4"><a href="{{ url_for('admin.mp3_browser', path=parent) }}" class="mp3-name">{{ icon('arrow-left') }} ..</a></td>
+        </tr>
+      {% endif %}
+      {% for f in listing.folders %}
+        <tr class="mp3-row mp3-drop" draggable="true" data-path="{{ f.path }}" data-name="{{ f.name }}" data-dest="{{ f.path }}" data-kind="folder">
+          <td><a href="{{ url_for('admin.mp3_browser', path=f.path) }}" class="mp3-name">{{ icon('folder', 'mp3-icon-folder') }} {{ f.name }}</a></td>
+          <td></td>
+          <td></td>
+          <td class="admin-table-actions">
+            <button type="button" class="btn-link mp3-rename" title="{{ t('admin_mp3_rename') }}">{{ icon('pencil-line') }}</button>
+            <button type="button" class="btn-link btn-link-danger mp3-delete" title="{{ t('common_delete') }}">{{ icon('trash-2') }}</button>
+          </td>
+        </tr>
+      {% endfor %}
+      {% for f in listing.files %}
+        <tr class="mp3-row" draggable="true" data-path="{{ f.path }}" data-name="{{ f.name }}" data-kind="file">
+          <td><span class="mp3-name">{{ icon('music', 'mp3-icon-file') }} {{ f.name }}</span></td>
+          <td class="mp3-nowrap">{{ '%.1f'|format(f.size / 1048576) }} Mo</td>
+          <td class="mp3-nowrap">{{ f.mtime.strftime('%d/%m/%Y %H:%M') }}</td>
+          <td class="admin-table-actions">
+            <button type="button" class="btn-link mp3-tags" title="{{ t('admin_mp3_edit_tags') }}">{{ icon('tag') }}</button>
+            <button type="button" class="btn-link mp3-rename" title="{{ t('admin_mp3_rename') }}">{{ icon('pencil-line') }}</button>
+            <button type="button" class="btn-link btn-link-danger mp3-delete" title="{{ t('common_delete') }}">{{ icon('trash-2') }}</button>
+          </td>
+        </tr>
+      {% endfor %}
+      {% if not listing.folders and not listing.files %}
+        <tr><td colspan="4" class="admin-table-description">{{ t('admin_mp3_empty') }}</td></tr>
+      {% endif %}
+    </tbody>
+  </table>
+  <p class="admin-field-hint">{{ t('admin_mp3_drop_hint') }}</p>
+</div>
+
+<dialog id="mp3-name-modal" class="app-modal admin-settings-modal">
+  <div class="app-modal-header">
+    <h2 id="mp3-name-title"></h2>
+    <button type="button" class="app-modal-close" onclick="this.closest('dialog').close()" aria-label="{{ t('common_back') }}">{{ icon('x') }}</button>
+  </div>
+  <div class="app-modal-body">
+    <form class="admin-settings-form" id="mp3-name-form">
+      <label>{{ t('admin_mp3_col_name') }}<input type="text" name="name" id="mp3-name-input" required maxlength="200"></label>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" onclick="this.closest('dialog').close()">{{ t('common_cancel') }}</button>
+        <button type="submit" class="btn-primary">{{ t('common_save') }}</button>
+      </div>
+    </form>
+  </div>
+</dialog>
+
+<dialog id="mp3-delete-modal" class="app-modal admin-settings-modal">
+  <div class="app-modal-header">
+    <h2>{{ t('common_delete') }}</h2>
+    <button type="button" class="app-modal-close" onclick="this.closest('dialog').close()" aria-label="{{ t('common_back') }}">{{ icon('x') }}</button>
+  </div>
+  <div class="app-modal-body">
+    <form class="admin-settings-form" id="mp3-delete-form">
+      <p id="mp3-delete-text"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" onclick="this.closest('dialog').close()">{{ t('common_cancel') }}</button>
+        <button type="submit" class="btn-primary btn-danger">{{ t('common_delete') }}</button>
+      </div>
+    </form>
+  </div>
+</dialog>
+
+<dialog id="mp3-tags-modal" class="app-modal admin-settings-modal">
+  <div class="app-modal-header">
+    <h2 id="mp3-tags-title"></h2>
+    <button type="button" class="app-modal-close" onclick="this.closest('dialog').close()" aria-label="{{ t('common_back') }}">{{ icon('x') }}</button>
+  </div>
+  <div class="app-modal-body">
+    <form class="admin-settings-form" id="mp3-tags-form">
+      <p class="admin-field-hint" id="mp3-tags-hint"></p>
+      {% for field in tag_fields %}
+        <label data-field="{{ field }}">{{ t('admin_mp3_tag_' ~ field) }}<input type="text" name="{{ field }}"></label>
+      {% endfor %}
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" onclick="this.closest('dialog').close()">{{ t('common_cancel') }}</button>
+        <button type="submit" class="btn-primary">{{ t('common_save') }}</button>
+      </div>
+    </form>
+  </div>
+</dialog>
+
+<dialog id="mp3-leave-modal" class="app-modal admin-settings-modal">
+  <div class="app-modal-header">
+    <h2>{{ t('admin_mp3_leave_title') }}</h2>
+    <button type="button" class="app-modal-close" onclick="this.closest('dialog').close()" aria-label="{{ t('common_back') }}">{{ icon('x') }}</button>
+  </div>
+  <div class="app-modal-body">
+    <p>{{ t('admin_mp3_leave_text') }}</p>
+    <div class="modal-actions">
+      <button type="button" class="btn-secondary" onclick="this.closest('dialog').close()">{{ t('admin_mp3_leave_stay') }}</button>
+      <button type="button" class="btn-primary btn-danger" id="mp3-leave-ok">{{ t('admin_mp3_leave_ok') }}</button>
+    </div>
+  </div>
+</dialog>
+
+<script>
+(function () {
+  var currentPath = {{ listing.path|tojson }};
+  var csrfToken = {{ csrf_token()|tojson }};
+  var maxBytes = {{ config.MAX_CONTENT_LENGTH|tojson }};
+  var urls = {
+    folder: {{ url_for('admin.mp3_create_folder')|tojson }},
+    rename: {{ url_for('admin.mp3_rename')|tojson }},
+    move: {{ url_for('admin.mp3_move')|tojson }},
+    deleteInfo: {{ url_for('admin.mp3_delete_info')|tojson }},
+    del: {{ url_for('admin.mp3_delete')|tojson }},
+    upload: {{ url_for('admin.mp3_upload')|tojson }},
+    sync: {{ url_for('admin.mp3_sync')|tojson }},
+    tags: {{ url_for('admin.mp3_tags')|tojson }},
+    scan: {{ url_for('admin.mp3_scan')|tojson }},
+    jobsStatus: {{ url_for('admin.jobs_status')|tojson }},
+  };
+  var i18n = {
+    newFolder: {{ t('admin_mp3_new_folder')|tojson }},
+    rename: {{ t('admin_mp3_rename')|tojson }},
+    deleteFile: {{ t('admin_mp3_delete_file')|tojson }},
+    deleteFolder: {{ t('admin_mp3_delete_folder')|tojson }},
+    editTags: {{ t('admin_mp3_edit_tags')|tojson }},
+    folderTags: {{ t('admin_mp3_folder_tags')|tojson }},
+    folderTagsHint: {{ t('admin_mp3_folder_tags_hint')|tojson }},
+    uploading: {{ t('admin_mp3_uploading')|tojson }},
+    syncing: {{ t('admin_mp3_syncing')|tojson }},
+    uploadDone: {{ t('admin_mp3_upload_done')|tojson }},
+    tooBig: {{ t('admin_mp3_too_big')|tojson }},
+    noMp3: {{ t('admin_mp3_no_mp3')|tojson }},
+    sessionExpired: {{ t('admin_session_expired_msg')|tojson }},
+    unexpected: {{ t('admin_unexpected_error_msg')|tojson }},
+    scanRunning: {{ t('admin_mp3_scan_running')|tojson }},
+    leaveTitle: {{ t('admin_mp3_leave_title')|tojson }},
+  };
+
+  function fmt(text, values) {
+    return text.replace(/\{(\w+)\}/g, function (m, k) { return k in values ? values[k] : m; });
+  }
+
+  var msg = document.getElementById('mp3-msg');
+  function showMessage(ok, text) {
+    if (!text) return;
+    msg.textContent = text;
+    msg.className = 'flash ' + (ok ? 'flash-success' : 'flash-error');
+    msg.hidden = false;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Message conserve a travers le rechargement de la page apres une action.
+  try {
+    var pending = sessionStorage.getItem('mp3-msg');
+    if (pending) {
+      sessionStorage.removeItem('mp3-msg');
+      pending = JSON.parse(pending);
+      showMessage(pending.ok, pending.text);
+    }
+  } catch (e) {}
+
+  function reloadWith(ok, text) {
+    try { if (text) sessionStorage.setItem('mp3-msg', JSON.stringify({ ok: ok, text: text })); } catch (e) {}
+    window.location.reload();
+  }
+
+  function parseJson(r) {
+    var contentType = r.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      var err = new Error('session-expired');
+      err.sessionExpired = r.ok || r.redirected;
+      throw err;
+    }
+    return r.json();
+  }
+
+  function handleError(err) {
+    showMessage(false, err && err.sessionExpired ? i18n.sessionExpired : i18n.unexpected);
+  }
+
+  function post(url, data) {
+    var body = new FormData();
+    Object.keys(data).forEach(function (k) { body.append(k, data[k]); });
+    return fetch(url, {
+      method: 'POST',
+      body: body,
+      headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': csrfToken },
+      credentials: 'same-origin',
+    }).then(parseJson);
+  }
+
+  function get(url, params) {
+    return fetch(url + '?' + new URLSearchParams(params), {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      credentials: 'same-origin',
+    }).then(parseJson);
+  }
+
+  // Action simple : POST puis rechargement si ok, message sinon.
+  function act(url, data, dialog) {
+    return post(url, data).then(function (res) {
+      if (res.ok) {
+        if (dialog) dialog.close();
+        reloadWith(true, res.message);
+      } else {
+        showMessage(false, res.message);
+        if (dialog) dialog.close();
+      }
+    }).catch(handleError);
+  }
+
+  // --- Nouveau dossier / renommer ---
+  var nameModal = document.getElementById('mp3-name-modal');
+  var nameInput = document.getElementById('mp3-name-input');
+  var nameAction = null;
+  function openNameModal(title, value, onSubmit) {
+    document.getElementById('mp3-name-title').textContent = title;
+    nameInput.value = value;
+    nameAction = onSubmit;
+    nameModal.showModal();
+    nameInput.focus();
+    // Fichier : selectionne le nom sans l'extension .mp3
+    var dot = value.toLowerCase().lastIndexOf('.mp3');
+    nameInput.setSelectionRange(0, dot > 0 ? dot : value.length);
+  }
+  document.getElementById('mp3-name-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (nameAction) nameAction(nameInput.value.trim());
+  });
+  document.getElementById('mp3-new-folder').addEventListener('click', function () {
+    openNameModal(i18n.newFolder, '', function (name) {
+      act(urls.folder, { path: currentPath, name: name }, nameModal);
+    });
+  });
+
+  // --- Suppression ---
+  var deleteModal = document.getElementById('mp3-delete-modal');
+  var deleteAction = null;
+  document.getElementById('mp3-delete-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (deleteAction) deleteAction();
+  });
+
+  // --- Tags ---
+  var tagsModal = document.getElementById('mp3-tags-modal');
+  var tagsForm = document.getElementById('mp3-tags-form');
+  var tagsTarget = null;
+  function openTagsModal(path, folder, title, values) {
+    tagsTarget = { path: path, folder: folder };
+    document.getElementById('mp3-tags-title').textContent = title;
+    var hint = document.getElementById('mp3-tags-hint');
+    hint.textContent = folder ? i18n.folderTagsHint : '';
+    hint.hidden = !folder;
+    tagsForm.querySelectorAll('label[data-field]').forEach(function (label) {
+      var field = label.dataset.field;
+      // Dossier entier : titre et numero de piste n'ont pas de sens commun
+      label.hidden = folder && (field === 'title' || field === 'tracknumber');
+      label.querySelector('input').value = (values && values[field]) || '';
+    });
+    tagsModal.showModal();
+  }
+  tagsForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var data = { path: tagsTarget.path, folder: tagsTarget.folder ? '1' : '0' };
+    tagsForm.querySelectorAll('label[data-field]').forEach(function (label) {
+      if (!label.hidden) data[label.dataset.field] = label.querySelector('input').value;
+    });
+    act(urls.tags, data, tagsModal);
+  });
+  var folderTagsBtn = document.getElementById('mp3-folder-tags');
+  if (folderTagsBtn) {
+    folderTagsBtn.addEventListener('click', function () {
+      openTagsModal(currentPath, true, i18n.folderTags, null);
+    });
+  }
+
+  // --- Boutons de ligne ---
+  document.querySelectorAll('.mp3-row[data-path]').forEach(function (row) {
+    var path = row.dataset.path, name = row.dataset.name, isFolder = row.dataset.kind === 'folder';
+    row.querySelector('.mp3-rename').addEventListener('click', function () {
+      openNameModal(i18n.rename, name, function (newName) {
+        act(urls.rename, { path: path, name: newName }, nameModal);
+      });
+    });
+    row.querySelector('.mp3-delete').addEventListener('click', function () {
+      var text = document.getElementById('mp3-delete-text');
+      deleteAction = function () { act(urls.del, { path: path }, deleteModal); };
+      if (!isFolder) {
+        text.textContent = fmt(i18n.deleteFile, { name: name });
+        deleteModal.showModal();
+        return;
+      }
+      get(urls.deleteInfo, { path: path }).then(function (res) {
+        if (!res.ok) { showMessage(false, res.message); return; }
+        text.textContent = fmt(i18n.deleteFolder, { name: name, count: res.count });
+        deleteModal.showModal();
+      }).catch(handleError);
+    });
+    var tagsBtn = row.querySelector('.mp3-tags');
+    if (tagsBtn) {
+      tagsBtn.addEventListener('click', function () {
+        get(urls.tags, { path: path }).then(function (res) {
+          if (!res.ok) { showMessage(false, res.message); return; }
+          openTagsModal(path, false, i18n.editTags + ' - ' + name, res.tags);
+        }).catch(handleError);
+      });
+    }
+  });
+
+  // --- Upload (boutons, glisser-deposer depuis l'ordinateur) ---
+  // Chaque element : { file, name } ou name = chemin relatif dans le dossier envoye.
+  var progress = document.getElementById('mp3-progress');
+  var progressFill = document.getElementById('mp3-progress-fill');
+  var progressText = document.getElementById('mp3-progress-text');
+  var BATCH_FILES = 20;
+  var uploading = false;
+
+  // Envoi en cours : quitter la page l'interromprait. Liens internes ->
+  // fenetre de confirmation de l'appli ; fermeture de l'onglet/rechargement
+  // -> avertissement du navigateur (seul possible dans ce cas).
+  window.addEventListener('beforeunload', function (e) {
+    if (!uploading) return;
+    e.preventDefault();
+    e.returnValue = '';
+  });
+  var leaveModal = document.getElementById('mp3-leave-modal');
+  var leaveHref = null;
+  document.addEventListener('click', function (e) {
+    var link = e.target.closest && e.target.closest('a[href]');
+    if (!uploading || !link || link.target === '_blank' || e.defaultPrevented) return;
+    e.preventDefault();
+    leaveHref = link.href;
+    leaveModal.showModal();
+  });
+  document.getElementById('mp3-leave-ok').addEventListener('click', function () {
+    uploading = false;
+    leaveModal.close();
+    if (leaveHref) window.location.href = leaveHref;
+  });
+  var batchBytes = Math.min(Math.floor(maxBytes * 0.8), 100 * 1024 * 1024);
+
+  function uploadAll(items, dest) {
+    var mp3 = items.filter(function (it) { return /\.mp3$/i.test(it.name); });
+    var ignored = items.length - mp3.length;
+    var tooBig = mp3.filter(function (it) { return it.file.size > batchBytes; });
+    mp3 = mp3.filter(function (it) { return it.file.size <= batchBytes; });
+    if (tooBig.length) {
+      showMessage(false, fmt(i18n.tooBig, { names: tooBig.map(function (it) { return it.name; }).join(', ') }));
+    }
+    if (!mp3.length) {
+      if (!tooBig.length) showMessage(false, i18n.noMp3);
+      return;
+    }
+
+    var batches = [], batch = [], size = 0;
+    mp3.forEach(function (it) {
+      if (batch.length && (batch.length >= BATCH_FILES || size + it.file.size > batchBytes)) {
+        batches.push(batch); batch = []; size = 0;
+      }
+      batch.push(it); size += it.file.size;
+    });
+    batches.push(batch);
+
+    uploading = true;
+    var total = mp3.reduce(function (s, it) { return s + it.file.size; }, 0);
+    var done = 0, saved = 0;
+    progress.hidden = false;
+
+    function setProgress(sent) {
+      var pct = total ? Math.round((done + sent) * 100 / total) : 100;
+      progressFill.style.width = pct + '%';
+      progressText.textContent = fmt(i18n.uploading, { pct: pct });
+    }
+
+    function sendBatch(index) {
+      if (index >= batches.length) {
+        progressText.textContent = i18n.syncing;
+        return post(urls.sync, {}).then(function (res) {
+          uploading = false;
+          reloadWith(true, fmt(i18n.uploadDone, { saved: saved, skipped: ignored }) + ' ' + res.message);
+        });
+      }
+      return new Promise(function (resolve, reject) {
+        var body = new FormData();
+        body.append('path', dest);
+        batches[index].forEach(function (it) {
+          body.append('files', it.file, it.file.name);
+          body.append('names', it.name);
+        });
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', urls.upload);
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        xhr.setRequestHeader('X-CSRFToken', csrfToken);
+        xhr.upload.onprogress = function (e) { if (e.lengthComputable) setProgress(e.loaded * batchSize(index) / e.total); };
+        xhr.onload = function () {
+          var res = null;
+          try { res = JSON.parse(xhr.responseText); } catch (e) {}
+          if (!res) { var err = new Error('bad-response'); err.sessionExpired = xhr.status === 200; reject(err); return; }
+          if (!res.ok) { reject(new Error(res.message)); return; }
+          saved += res.saved; ignored += res.skipped;
+          done += batchSize(index);
+          setProgress(0);
+          resolve();
+        };
+        xhr.onerror = function () { reject(new Error('network')); };
+        xhr.send(body);
+      }).then(function () { return sendBatch(index + 1); });
+    }
+
+    function batchSize(index) {
+      return batches[index].reduce(function (s, it) { return s + it.file.size; }, 0);
+    }
+
+    setProgress(0);
+    sendBatch(0).catch(function (err) {
+      uploading = false;
+      progress.hidden = true;
+      if (err && err.message && err.message !== 'network' && err.message !== 'bad-response') showMessage(false, err.message);
+      else handleError(err);
+      // Une partie a pu etre envoyee : on met quand meme le catalogue a jour.
+      if (saved) post(urls.sync, {}).catch(function () {});
+    });
+  }
+
+  document.getElementById('mp3-file-input').addEventListener('change', function () {
+    uploadAll(Array.from(this.files).map(function (f) { return { file: f, name: f.name }; }), currentPath);
+    this.value = '';
+  });
+  document.getElementById('mp3-folder-input').addEventListener('change', function () {
+    uploadAll(Array.from(this.files).map(function (f) { return { file: f, name: f.webkitRelativePath || f.name }; }), currentPath);
+    this.value = '';
+  });
+
+  // Fichiers/dossiers deposes depuis l'ordinateur : parcours des dossiers
+  // via l'API FileSystemEntry pour garder leur arborescence.
+  function readEntry(entry) {
+    if (entry.isFile) {
+      return new Promise(function (resolve) {
+        entry.file(function (f) { resolve([{ file: f, name: entry.fullPath.replace(/^\//, '') }]); }, function () { resolve([]); });
+      });
+    }
+    if (!entry.isDirectory) return Promise.resolve([]);
+    var reader = entry.createReader(), all = [];
+    return new Promise(function (resolve) {
+      (function readBatch() {
+        reader.readEntries(function (entries) {
+          if (!entries.length) {
+            Promise.all(all.map(readEntry)).then(function (lists) { resolve([].concat.apply([], lists)); });
+            return;
+          }
+          all = all.concat(Array.from(entries));
+          readBatch();
+        }, function () { resolve([]); });
+      })();
+    });
+  }
+
+  function dropFromComputer(dataTransfer, dest) {
+    var entries = Array.from(dataTransfer.items || [])
+      .map(function (item) { return item.webkitGetAsEntry ? item.webkitGetAsEntry() : null; })
+      .filter(Boolean);
+    if (!entries.length) {
+      uploadAll(Array.from(dataTransfer.files).map(function (f) { return { file: f, name: f.name }; }), dest);
+      return;
+    }
+    Promise.all(entries.map(readEntry)).then(function (lists) {
+      uploadAll([].concat.apply([], lists), dest);
+    });
+  }
+
+  // --- Relance du job 'mp3_scan' : suivi via /admin/jobs/status ---
+  var scanBtn = document.getElementById('mp3-scan');
+  var scanLabel = scanBtn.querySelector('span');
+  var scanText = scanLabel.textContent;
+  function setScanning(on) {
+    scanBtn.disabled = on;
+    scanBtn.classList.toggle('mp3-scan-running', on);
+    scanLabel.textContent = on ? i18n.scanRunning : scanText;
+  }
+  function pollScan() {
+    get(urls.jobsStatus, {}).then(function (res) {
+      var job = res.jobs.filter(function (j) { return j.id === 'mp3_scan'; })[0];
+      if (job && job.running) { setTimeout(pollScan, 2000); return; }
+      setScanning(false);
+      if (job && job.last_error) showMessage(false, job.last_error);
+      else reloadWith(true, job && job.last_detail);
+    }).catch(function (err) { setScanning(false); handleError(err); });
+  }
+  scanBtn.addEventListener('click', function () {
+    setScanning(true);
+    post(urls.scan, {}).then(function (res) {
+      if (!res.ok) { setScanning(false); showMessage(false, res.message); return; }
+      setTimeout(pollScan, 1000);
+    }).catch(function (err) { setScanning(false); handleError(err); });
+  });
+  {% if scan_running %}setScanning(true); pollScan();{% endif %}
+
+  // --- Glisser-deposer : deplacement interne et depot depuis l'ordinateur ---
+  var INTERNAL = 'application/x-tunoova-mp3';
+  var dragged = null;
+
+  document.querySelectorAll('.mp3-row[draggable="true"]').forEach(function (row) {
+    row.addEventListener('dragstart', function (e) {
+      dragged = row.dataset.path;
+      e.dataTransfer.setData(INTERNAL, dragged);
+      e.dataTransfer.effectAllowed = 'move';
+      row.classList.add('mp3-dragging');
+    });
+    row.addEventListener('dragend', function () {
+      dragged = null;
+      row.classList.remove('mp3-dragging');
+      document.querySelectorAll('.mp3-drop-over').forEach(function (el) { el.classList.remove('mp3-drop-over'); });
+    });
+  });
+
+  function isInternal(e) { return Array.from(e.dataTransfer.types).indexOf(INTERNAL) >= 0; }
+  function isFiles(e) { return Array.from(e.dataTransfer.types).indexOf('Files') >= 0; }
+
+  document.querySelectorAll('.mp3-drop').forEach(function (target) {
+    target.addEventListener('dragover', function (e) {
+      if (isInternal(e)) {
+        if (target.dataset.dest === dragged) return; // dossier sur lui-meme
+        e.dataTransfer.dropEffect = 'move';
+      } else if (isFiles(e)) {
+        e.dataTransfer.dropEffect = 'copy';
+      } else {
+        return;
+      }
+      e.preventDefault();
+      e.stopPropagation();
+      target.classList.add('mp3-drop-over');
+    });
+    target.addEventListener('dragleave', function (e) {
+      if (!target.contains(e.relatedTarget)) target.classList.remove('mp3-drop-over');
+    });
+    target.addEventListener('drop', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      target.classList.remove('mp3-drop-over');
+      var dest = target.dataset.dest;
+      if (isInternal(e)) {
+        var source = e.dataTransfer.getData(INTERNAL);
+        if (source && source !== dest) act(urls.move, { path: source, dest: dest });
+      } else if (isFiles(e)) {
+        dropFromComputer(e.dataTransfer, dest);
+      }
+    });
+  });
+
+  // Depot ailleurs dans la liste : dossier courant (fichiers de l'ordinateur uniquement).
+  var dropzone = document.getElementById('mp3-dropzone');
+  dropzone.addEventListener('dragover', function (e) {
+    if (!isFiles(e) || isInternal(e)) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+    dropzone.classList.add('mp3-drop-over');
+  });
+  dropzone.addEventListener('dragleave', function (e) {
+    if (!dropzone.contains(e.relatedTarget)) dropzone.classList.remove('mp3-drop-over');
+  });
+  dropzone.addEventListener('drop', function (e) {
+    dropzone.classList.remove('mp3-drop-over');
+    if (!isFiles(e) || isInternal(e)) return;
+    e.preventDefault();
+    dropFromComputer(e.dataTransfer, currentPath);
+  });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,110 @@
+{# Episode en tuile, comme les morceaux d'un album (Music) : titre sur
+   2 lignes maximum puis date de parution #}
+{% macro episode_li(episode, image_url=None) %}
+<li class="track-item episode-tile">
+  {% if image_url %}
+    <img class="tile-thumb" src="{{ image_url }}" alt="" loading="lazy"
+         onerror="this.replaceWith(Object.assign(document.createElement('span'), {className: 'tile-thumb tile-thumb-placeholder', textContent: '🎙'}))">
+  {% else %}
+    <span class="tile-thumb tile-thumb-placeholder">🎙</span>
+  {% endif %}
+  <div class="track-info">
+    <button type="button" class="track-play-btn" onclick="tunoovaStartPlayback('{{ url_for('podcast.play_episode', episodes_users_id=episode.EpisodesUsersId) }}')">
+      <span class="episode-name">{{ episode.EpisodeName }}</span>
+      {% if episode.EpisodePublishDate %}
+        <span class="episode-date">{{ icon('calendar') }} {{ episode.EpisodePublishDate.strftime('%d/%m/%Y') }}</span>
+      {% endif %}
+    </button>
+  </div>
+  {% if episode.EpisodeStatus == 'New' %}
+    <span class="badge badge-new">New</span>
+  {% elif episode.EpisodeStatus == 'Read' %}
+    <span class="badge badge-read">✓</span>
+  {% endif %}
+</li>
+{% endmacro %}
+
+{# Chargement au defilement : quand cette ligne apparait a l'ecran, elle est
+   remplacee par la page d'episodes suivante (et un nouveau declencheur s'il en reste).
+   hx-target/hx-select explicites : sinon herites de <body> (#app-boost-root),
+   la reponse remplacerait tout l'ecran (cf. base.html) #}
+{% macro pagination_li(podcast_users_id, next_offset) %}
+<li class="track-item show-more episodes-loader"
+    hx-get="{{ url_for('podcast.more_episodes', podcast_users_id=podcast_users_id, offset=next_offset) }}"
+    hx-trigger="intersect once" hx-target="this" hx-select="li" hx-swap="outerHTML">
+  {{ icon('refresh-cw', 'spin') }}
+</li>
+{% endmacro %}
+
+{# Page detail d'un podcast : en-tete (nom + actualiser) puis episodes en tuiles #}
+{% macro episode_block(subscription, episodes, has_more, page_size) %}
+<div id="podcast-block-{{ subscription.PodcastUsersId }}">
+  <div class="library-detail-header podcast-detail-header">
+    <h2 class="library-detail-title">{{ subscription.PodcastName }}</h2>
+    <button class="icon-btn" title="{{ t('podcast_refresh') }}"
+            hx-post="{{ url_for('podcast.refresh', podcast_users_id=subscription.PodcastUsersId) }}"
+            hx-target="#podcast-block-{{ subscription.PodcastUsersId }}"
+            hx-select="#podcast-block-{{ subscription.PodcastUsersId }}" hx-swap="outerHTML"
+            hx-headers='{"X-CSRFToken": "{{ csrf_token() }}"}'>{{ icon('refresh-cw') }}</button>
+  </div>
+  <ul class="track-list" id="episodes-{{ subscription.PodcastUsersId }}">
+    {% for episode in episodes %}
+      {{ episode_li(episode, subscription.LinkImage) }}
+    {% else %}
+      <li class="track-item empty-state">{{ t('podcast_no_episodes') }}</li>
+    {% endfor %}
+    {% if has_more %}
+      {{ pagination_li(subscription.PodcastUsersId, page_size) }}
+    {% endif %}
+  </ul>
+</div>
+{% endmacro %}
+
+{# Tuile de la liste Podcast : meme presentation que la tuile Radio
+   (.radio-card), titre seul + fleche vers les episodes (page detail) #}
+{% macro podcast_tile(sub) %}
+{% set detail_url = url_for('podcast.detail', podcast_users_id=sub.PodcastUsersId) %}
+<div class="radio-card" id="podcast-block-{{ sub.PodcastUsersId }}">
+  <a class="radio-play-btn" href="{{ detail_url }}">
+    {% if sub.LinkImage %}
+      <img class="tile-thumb" src="{{ sub.LinkImage }}" alt=""
+           onerror="this.replaceWith(Object.assign(document.createElement('span'), {className: 'tile-thumb tile-thumb-placeholder', textContent: '🎙'}))">
+    {% else %}
+      <span class="tile-thumb tile-thumb-placeholder">🎙</span>
+    {% endif %}
+    <span class="radio-card-info">
+      <span class="radio-card-title">{{ sub.PodcastName }}</span>
+    </span>
+  </a>
+  <button type="button" class="icon-btn" title="{{ t('common_delete') }}"
+          onclick="document.getElementById('delete-modal-{{ sub.PodcastUsersId }}').showModal()">{{ icon('trash-2') }}</button>
+  <a class="icon-btn" href="{{ url_for('podcast.edit', podcast_users_id=sub.PodcastUsersId) }}" title="{{ t('common_edit') }}">&#9998;</a>
+  <a class="track-row-chevron" href="{{ detail_url }}" aria-label="{{ sub.PodcastName }}">{{ icon('chevron-right') }}</a>
+
+  <dialog id="delete-modal-{{ sub.PodcastUsersId }}" class="app-modal">
+    <div class="app-modal-header">
+      <h2>{{ t('common_delete') }}</h2>
+      <button type="button" class="app-modal-close" onclick="this.closest('dialog').close()" aria-label="{{ t('common_back') }}">{{ icon('x') }}</button>
+    </div>
+    <div class="app-modal-body">
+      <p>{{ t('podcast_delete_confirm', name=sub.PodcastName) }}</p>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" onclick="this.closest('dialog').close()">{{ t('common_cancel') }}</button>
+        <button type="button" class="btn-dark"
+                hx-post="{{ url_for('podcast.delete', podcast_users_id=sub.PodcastUsersId) }}"
+                hx-target="#podcast-block-{{ sub.PodcastUsersId }}" hx-swap="delete"
+                hx-headers='{"X-CSRFToken": "{{ csrf_token() }}"}'>{{ t('common_ok') }}</button>
+      </div>
+    </div>
+  </dialog>
+</div>
+{% endmacro %}
+
+{% macro episode_match_block(subscription, episodes) %}
+{{ podcast_tile(subscription) }}
+<ul class="track-list podcast-match-episodes">
+  {% for episode in episodes %}
+    {{ episode_li(episode, subscription.LinkImage) }}
+  {% endfor %}
+</ul>
+{% endmacro %}
